@@ -22,6 +22,8 @@ Für den Einstieg empfehle ich diese Reihenfolge:
 10. **`M141 LB3 Bewertung LE.xlsx`** — Selbsteinschätzung
 
 > **Wichtiger Hinweis Cloud-Provider:** Ursprünglich war **AWS RDS for MariaDB** geplant. Da kein TBZ-Schulungs-AWS-Account zur Verfügung stand, wurde nach erneuter Evaluation auf **Aiven for MySQL** gewechselt. Aiven qualifiziert gemäss LB3-Rahmen ("Andere oder eigene Cloud-DB gibt +") für den Plus-Bonus. Details in `docs/MS_A_Cloud_Evaluation.md`.
+>
+> **Update 02.07.2026 – eigene Cloud (max. Bonus):** Die produktive DB wird zusätzlich als **selbstgehostete eigene Cloud** auf dem Proxmox-Host „freya" umgesetzt (LXC `cloud-db-giovanni`, MariaDB 11.8, TLS erzwungen, IP-Allowlist). Bauplan, Härtung, Firewall, DCL und Migrations-Skript sind vollständig: `docs/MS_C_Cloud_SelfHosted.md`, `config/my_cloud_selfhosted.cnf`, `sql/repro/setup_cloud_selfhosted.sh`, `sql/dcl/04_selfhosted_cloud_users.sql`, `sql/migration/migrate_local_to_selfhosted.sh`. **Das Live-Deployment ist derzeit blockiert**, weil freya während des Setups vom Netz fiel (Host offline, siehe Statushinweis im Kapitel); der Container ist angelegt, das MariaDB-Setup läuft nach freya-Recovery.
 
 ---
 
@@ -74,6 +76,7 @@ LB3-Praxisarbeit/
 │   ├── MS_D_Migration.md
 │   ├── Demo_Skript.md
 │   ├── Fazit.md
+│   ├── MS_C_Cloud_SelfHosted.md    ← Eigene Cloud auf Proxmox (Bonus): Setup+Härtung, Live-Deploy blockiert
 │   ├── Protokollierung.md
 │   ├── Reproduktion_Lokal.md       ← Nachweis: DB aus Skripten reproduzierbar (MariaDB-Lauf)
 │   └── STEP_BY_STEP_GUIDE.md

@@ -1,0 +1,45 @@
+# ============================================================
+# M141 LB3 - "Eigene Cloud-DB" - produktive Konfiguration
+# Server:  cloud-db-giovanni  (unprivilegierter LXC auf Proxmox "freya")
+# Endpoint: 192.168.1.62:3306  (VLAN 1, Homelab GioTech)
+# Autor:   Giovanni Merola  -  02.07.2026
+# ------------------------------------------------------------
+# Diese Datei entspricht 1:1 dem Inhalt, den das Setup-Script
+# (sql/repro/setup_cloud_selfhosted.sh) nach
+# /etc/mysql/mariadb.conf.d/99-cloud-giovanni.cnf schreibt.
+# Sie dokumentiert die Haertung der eigenen Cloud-DB analog zur
+# "Advanced configuration" eines Managed-Cloud-Anbieters.
+# ============================================================
+[mysqld]
+
+# --- Netzwerk: LAN-Zugriff, aber NUR verschluesselt ----------
+# bind-address 0.0.0.0 = erreichbar aus dem LAN;
+# der Zugriff wird zweifach eingegrenzt:
+#   1) Proxmox-Firewall (nur erlaubte Quell-IPs auf :3306)
+#   2) require_secure_transport = ON  -> Klartext wird abgewiesen
+bind-address              = 0.0.0.0
+require_secure_transport  = ON
+ssl-ca                    = /etc/mysql/certs/ca.pem
+ssl-cert                  = /etc/mysql/certs/server-cert.pem
+ssl-key                   = /etc/mysql/certs/server-key.pem
+
+# --- Zeichensatz (identisch zur lokalen DB, kein Migr.-Drift) -
+character-set-server      = utf8mb4
+collation-server          = utf8mb4_unicode_ci
+
+# --- Haertung / Betrieb --------------------------------------
+skip-name-resolve         = 1     # keine DNS-Reverse-Lookups (schneller, robuster)
+max_connections           = 50    # begrenzt Ressourcenverbrauch
+wait_timeout              = 600
+interactive_timeout       = 600
+local-infile              = 0     # LOAD DATA LOCAL serverseitig verboten (Angriffsflaeche)
+
+# --- Beobachtbarkeit -----------------------------------------
+slow_query_log            = 1
+slow_query_log_file       = /var/log/mysql/slow.log
+long_query_time           = 2
+log_error                 = /var/log/mysql/error.log
+
+# --- InnoDB ---------------------------------------------------
+innodb_buffer_pool_size        = 512M
+innodb_flush_log_at_trx_commit = 1   # ACID-sicher (Durability)
