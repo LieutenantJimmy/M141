@@ -88,11 +88,21 @@ freya-Störung eindrücklich zeigt.
 
 ## 6. Recovery / Nächste Schritte (sobald freya wieder online)
 
-1. freya-Erreichbarkeit prüfen: `ping 192.168.1.32`, dann Web-UI `https://192.168.1.32:8006`.
-2. **Firewall-Sicherheitscheck:** Beim Setup wurde die Proxmox-Datacenter-Firewall
-   aktiviert (`cluster.fw enable: 1`). Falls der Host-Zugriff (SSH/8006) nach dem
-   Neustart eingeschränkt ist, an der Konsole `pve-firewall stop` bzw. in
-   `/etc/pve/firewall/cluster.fw` `enable: 0` setzen und Regeln prüfen.
+> **⚠ Verdacht auf Auslöser der Störung.** Unmittelbar vor dem Netzausfall wurde
+> die Proxmox-Datacenter-Firewall aktiviert (`/etc/pve/firewall/cluster.fw`
+> `enable: 1`) und `pve-firewall restart` ausgeführt. Das ist der **wahrscheinliche
+> Auslöser** des Zugriffsverlusts (auch wenn das fehlende ARP eher auf eine
+> Host-/NIC-Ebene deutet). freya wird ohnehin per **BMC-Power-Cycle durch
+> Giovanni** neu gestartet (der BMC lehnt unsere Passwörter ab, daher kein
+> Remote-Fix möglich; der Host erholt sich nicht von selbst).
+>
+> **Deshalb MUSS die Recovery an der Konsole mit dem Firewall-Stop beginnen,
+> BEVOR irgendetwas anderes passiert** — sonst droht erneuter Aussperr-Effekt.
+
+1. **ZUERST an der Host-Konsole:** `pve-firewall stop`
+   *(dann in `/etc/pve/firewall/cluster.fw` `enable: 0` setzen und die Regeln
+   prüfen, bevor die Firewall ggf. kontrolliert wieder aktiviert wird).*
+2. freya-Erreichbarkeit prüfen: `ping 192.168.1.32`, dann Web-UI `https://192.168.1.32:8006` und SSH.
 3. Setup ausführen: `pct exec 9002 -- bash /root/setup_cloud_selfhosted.sh`.
 4. Migration: `sql/migration/migrate_local_to_selfhosted.sh` (Struktur+Daten+DCL, alles per TLS).
 5. Cloud-Tests: `sql/dql/70_tests_cloud.sql` gegen `192.168.1.62` und Screenshots
