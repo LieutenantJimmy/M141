@@ -1,0 +1,59 @@
+# ============================================================
+# my_aws.cnf – HISTORISCHE Parameter-Group für die *geplante* AWS-RDS-MariaDB
+# Autor: Giovanni Merola · M141 LB3 · 30.06.2026
+#
+# !!! NICHT MEHR PRODUKTIV !!!
+# Diese Datei dokumentiert die ursprünglich geplante AWS-RDS-Parameter-Group,
+# bevor das Projekt mangels TBZ-AWS-Account auf Aiven for MySQL gewechselt hat.
+# Die tatsächlich produktiv genutzte Konfiguration steht in `my_aiven.cnf`.
+# Die Datei verbleibt im Repo nur als Nachweis, dass die AWS-Variante
+# vollständig durchdacht war (siehe MS_A_Cloud_Evaluation.md).
+#
+# Verwendung: KEINE — rein dokumentarisch.
+# ============================================================
+
+[mysqld]
+
+# ----- Zeichensatz / Locale -----
+character_set_server          = utf8mb4
+collation_server              = utf8mb4_unicode_ci
+init_connect                  = 'SET NAMES utf8mb4'
+time_zone                     = '+00:00'
+
+# ----- Sicherheit -----
+require_secure_transport      = ON
+local_infile                  = OFF
+sql_mode                      = STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION,ERROR_FOR_DIVISION_BY_ZERO
+skip_name_resolve             = ON
+secure_file_priv              = /var/lib/mysql-files/
+
+# ----- Verbindung / Sessions -----
+max_connections               = 60
+wait_timeout                  = 600
+interactive_timeout           = 600
+max_allowed_packet            = 16M
+
+# ----- InnoDB -----
+default_storage_engine        = InnoDB
+innodb_file_per_table         = ON
+innodb_strict_mode            = ON
+# innodb_buffer_pool_size wird durch RDS dynamisch gesetzt
+# innodb_buffer_pool_size = {DBInstanceClassMemory*3/4}
+
+# ----- Logging -----
+slow_query_log                = ON
+long_query_time               = 1
+log_output                    = FILE
+general_log                   = OFF
+log_warnings                  = 2
+
+# ----- Audit (MariaDB server_audit plugin) -----
+server_audit_logging          = ON
+server_audit_events           = CONNECT,QUERY,TABLE
+server_audit_excl_users       = rdsadmin
+server_audit_file_rotate_size = 100M
+server_audit_file_rotations   = 9
+
+# ----- Replikation (vorbereitet, nicht zwingend aktiv) -----
+binlog_format                 = ROW
+expire_logs_days              = 7

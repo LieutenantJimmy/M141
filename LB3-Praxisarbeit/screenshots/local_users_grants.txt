@@ -1,0 +1,39 @@
++-------------------+-----------+-----------------+
+| User              | Host      | default_role    |
++-------------------+-----------+-----------------+
+| giovanni_benutzer | localhost | role_benutzer   |
+| giovanni_manager  | localhost | role_management |
+| giovanni_dba      | localhost |                 |
++-------------------+-----------+-----------------+
+===== SHOW GRANTS FOR 'giovanni_benutzer'@'localhost' =====
+Grants for giovanni_benutzer@localhost
+GRANT `role_benutzer` TO `giovanni_benutzer`@`localhost`
+GRANT USAGE ON *.* TO `giovanni_benutzer`@`localhost` IDENTIFIED BY PASSWORD '*FA8ABB6D826567F078CB03271B593907A8C4E757'
+SET DEFAULT ROLE `role_benutzer` FOR `giovanni_benutzer`@`localhost`
+===== SHOW GRANTS FOR 'giovanni_manager'@'localhost' =====
+Grants for giovanni_manager@localhost
+GRANT `role_management` TO `giovanni_manager`@`localhost`
+GRANT USAGE ON *.* TO `giovanni_manager`@`localhost` IDENTIFIED BY PASSWORD '*E119C160604814254ACDA899C9C63B0BB854E0ED'
+SET DEFAULT ROLE `role_management` FOR `giovanni_manager`@`localhost`
+===== SHOW GRANTS FOR 'giovanni_dba'@'localhost' =====
+Grants for giovanni_dba@localhost
+GRANT USAGE ON *.* TO `giovanni_dba`@`localhost` IDENTIFIED BY PASSWORD '*A15E36E2F3D61C50B2E61AAC443FACE712318E48'
+GRANT ALL PRIVILEGES ON `backpacker_lb3_giovanni`.* TO `giovanni_dba`@`localhost` WITH GRANT OPTION
+===== SHOW GRANTS FOR role_benutzer =====
+Grants for role_benutzer
+GRANT USAGE ON *.* TO `role_benutzer`
+GRANT SELECT (`deaktiviert`, `Benutzer_ID`, `Benutzergruppe`, `Benutzername`, `Vorname`, `Name`, `erfasst`, `aktiv`), INSERT (`Benutzergruppe`, `Benutzername`, `Vorname`, `Name`, `aktiv`), UPDATE (`Benutzergruppe`, `Benutzername`, `Vorname`, `Name`, `aktiv`) ON `backpacker_lb3_giovanni`.`tbl_benutzer` TO `role_benutzer`
+GRANT SELECT, INSERT, UPDATE, DELETE ON `backpacker_lb3_giovanni`.`tbl_buchung` TO `role_benutzer`
+GRANT SELECT ON `backpacker_lb3_giovanni`.`tbl_land` TO `role_benutzer`
+GRANT SELECT, UPDATE ON `backpacker_lb3_giovanni`.`tbl_personen` TO `role_benutzer`
+GRANT SELECT ON `backpacker_lb3_giovanni`.`tbl_leistung` TO `role_benutzer`
+GRANT SELECT, INSERT, UPDATE, DELETE ON `backpacker_lb3_giovanni`.`tbl_positionen` TO `role_benutzer`
+===== SHOW GRANTS FOR role_management =====
+Grants for role_management
+GRANT USAGE ON *.* TO `role_management`
+GRANT SELECT, INSERT, UPDATE, DELETE ON `backpacker_lb3_giovanni`.`tbl_personen` TO `role_management`
+GRANT SELECT ON `backpacker_lb3_giovanni`.`tbl_positionen` TO `role_management`
+GRANT SELECT, INSERT, UPDATE, DELETE ON `backpacker_lb3_giovanni`.`tbl_leistung` TO `role_management`
+GRANT SELECT ON `backpacker_lb3_giovanni`.`tbl_buchung` TO `role_management`
+GRANT SELECT, INSERT, UPDATE, DELETE ON `backpacker_lb3_giovanni`.`tbl_land` TO `role_management`
+GRANT SELECT, INSERT, UPDATE, DELETE ON `backpacker_lb3_giovanni`.`tbl_benutzer` TO `role_management`

@@ -1,0 +1,36 @@
+# --- OS junk ------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+__MACOSX/
+._*
+
+# --- Office/IDE temp files ----------------------------------------------------
+.~lock.*#
+~$*
+*.swp
+.idea/
+.vscode/
+
+# --- Local secrets — must never be in the repo --------------------------------
+# Aiven master password lives only in user's password manager / Aiven console.
+# Cloud DB-user demo passwords are in sql/dcl/03_cloud_users.sql by design
+# (the rubric demands working DCL) and are rotated after the demo.
+secrets/
+*.secret
+*.env
+*.env.local
+
+# --- Migration runtime artefacts ----------------------------------------------
+sql/migration/dumps/
+sql/migration/*.log
+
+# --- Build / IDE --------------------------------------------------------------
+node_modules/
+__pycache__/
+*.pyc
+
+# --- Original archive (CSVs are extracted next to it) -------------------------
+backpacker_lb3.csv.zip
+csv/backpacker_lb3.csv/
+csv/__MACOSX/

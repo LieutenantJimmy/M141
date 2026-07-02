@@ -1,0 +1,25 @@
++----------------+--------+--------------+--------------------+
+| Tabelle        | Engine | Zeilen (ca.) | Kollation          |
++----------------+--------+--------------+--------------------+
+| tbl_benutzer   | InnoDB |           11 | utf8mb4_unicode_ci |
+| tbl_buchung    | InnoDB |         1006 | utf8mb4_unicode_ci |
+| tbl_land       | InnoDB |           82 | utf8mb4_unicode_ci |
+| tbl_leistung   | InnoDB |            8 | utf8mb4_unicode_ci |
+| tbl_personen   | InnoDB |         2036 | utf8mb4_unicode_ci |
+| tbl_positionen | InnoDB |         1746 | utf8mb4_unicode_ci |
++----------------+--------+--------------+--------------------+
++--------------------+
+| Hinweis            |
++--------------------+
+| ECHTE Zeilenzahlen |
++--------------------+
++----------------+------+
+| t              | n    |
++----------------+------+
+| tbl_personen   | 2036 |
+| tbl_benutzer   |   11 |
+| tbl_land       |   82 |
+| tbl_leistung   |    8 |
+| tbl_buchung    | 1006 |
+| tbl_positionen | 1746 |
++----------------+------+

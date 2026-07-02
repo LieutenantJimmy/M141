@@ -1,0 +1,124 @@
+============================================================
+M141 LB3 – Backpacker_LB3 – Giovanni Merola
+Lokaler Testlauf (Datenkonsistenz + Rollen) – 30.06.2026
+DB: backpacker_lb3_giovanni · Engine: InnoDB · 10.6.23-MariaDB-0ubuntu0.22.04.1
+============================================================
+
+### T-D – DATENKONSISTENZ (User: root) ###
+tbl	zeilen
+tbl_personen	2036
+tbl_benutzer	11
+tbl_land	82
+tbl_leistung	8
+tbl_buchung	1006
+tbl_positionen	1746
+verwaiste_buchung_person
+0
+sentinel_land_in_buchung
+0
+verwaiste_pos_buchung
+0
+pos_ohne_leistung_fk
+0
+sentinel_deaktiviert
+0
+rueckwaertsbuchung
+0
+verletzte_checks
+22
+TABLE_NAME	INDEX_NAME	COLUMN_NAME
+tbl_benutzer	PRIMARY	Benutzer_ID
+tbl_benutzer	uq_benutzer_name	Benutzername
+tbl_buchung	idx_buchung_ankunft	Ankunft
+tbl_buchung	idx_buchung_land	Land_FS
+tbl_buchung	idx_buchung_personen	Personen_FS
+tbl_buchung	PRIMARY	Buchungs_ID
+tbl_land	PRIMARY	Land_ID
+tbl_land	uq_land_name	Land
+tbl_leistung	PRIMARY	LeistungID
+tbl_leistung	uq_leistung_beschr	Beschreibung
+tbl_personen	idx_personen_name	Name
+tbl_personen	PRIMARY	Personen_ID
+tbl_positionen	ft_pos_text	Leistung_Text
+tbl_positionen	idx_pos_benutzer	Benutzer_FS
+tbl_positionen	idx_pos_buchung	Buchungs_FS
+tbl_positionen	idx_pos_leistung	Leistung_FS
+tbl_positionen	PRIMARY	Positions_ID
+CONSTRAINT_NAME	TABLE_NAME	REFERENCED_TABLE_NAME
+fk_pos_benutzer	tbl_positionen	tbl_benutzer
+fk_pos_buchung	tbl_positionen	tbl_buchung
+fk_pos_leistung	tbl_positionen	tbl_leistung
+fk_buchung_land	tbl_buchung	tbl_land
+fk_buchung_personen	tbl_buchung	tbl_personen
+TABLE_NAME	TABLE_COLLATION
+tbl_land	utf8mb4_unicode_ci
+tbl_positionen	utf8mb4_unicode_ci
+tbl_buchung	utf8mb4_unicode_ci
+tbl_benutzer	utf8mb4_unicode_ci
+tbl_leistung	utf8mb4_unicode_ci
+tbl_personen	utf8mb4_unicode_ci
+
+============================================================
+### ROLLE role_benutzer (User: giovanni_benutzer) ###
+--- Kontext ---
+user	rolle
+giovanni_benutzer@localhost	role_benutzer
+--- A-01 POSITIV: SELECT COUNT personen (erwartet OK) ---
+personen_visible
+2036
+--- A-05 POSITIV: erlaubte Spalten tbl_benutzer (erwartet OK) ---
+Benutzer_ID	Benutzername	aktiv	deaktiviert
+1	admin	1	NULL
+2	mueller	1	NULL
+3	emueller	0	2001-12-01
+--- A-04 NEGATIV: SELECT Password (erwartet 1143 column denied) ---
+--------------
+SELECT Password FROM tbl_benutzer LIMIT 1
+--------------
+
+ERROR 1143 (42000) at line 1: SELECT command denied to user 'giovanni_benutzer'@'localhost' for column 'Password' in table 'tbl_benutzer'
+--- A-03 NEGATIV: DELETE personen (erwartet 1142) ---
+--------------
+DELETE FROM tbl_personen WHERE Personen_ID=1
+--------------
+
+ERROR 1142 (42000) at line 1: DELETE command denied to user 'giovanni_benutzer'@'localhost' for table `backpacker_lb3_giovanni`.`tbl_personen`
+--- A-08 NEGATIV: INSERT leistung (erwartet 1142) ---
+--------------
+INSERT INTO tbl_leistung (Beschreibung) VALUES ('Sollte verboten sein')
+--------------
+
+ERROR 1142 (42000) at line 1: INSERT command denied to user 'giovanni_benutzer'@'localhost' for table `backpacker_lb3_giovanni`.`tbl_leistung`
+
+============================================================
+### ROLLE role_management (User: giovanni_manager) ###
+--- Kontext ---
+user	rolle
+giovanni_manager@localhost	role_management
+--- B-01 POSITIV: SELECT COUNT personen (erwartet OK) ---
+cnt
+2036
+--- B-02 POSITIV: INSERT+DELETE leistung (erwartet OK) ---
+ergebnis
+OK
+--- B-03 POSITIV: UPDATE Password (erwartet OK) ---
+updated
+1
+--- B-04 NEGATIV: INSERT buchung (erwartet 1142) ---
+--------------
+INSERT INTO tbl_buchung (Personen_FS,Ankunft,Abreise,Land_FS) VALUES (1,NOW(),NOW()+INTERVAL 1 DAY,1)
+--------------
+
+ERROR 1142 (42000) at line 1: INSERT command denied to user 'giovanni_manager'@'localhost' for table `backpacker_lb3_giovanni`.`tbl_buchung`
+--- B-05 NEGATIV: UPDATE positionen (erwartet 1142) ---
+--------------
+UPDATE tbl_positionen SET Preis=0 WHERE Positions_ID=1
+--------------
+
+ERROR 1142 (42000) at line 1: UPDATE command denied to user 'giovanni_manager'@'localhost' for table `backpacker_lb3_giovanni`.`tbl_positionen`
+
+============================================================
+Ergebnis: alle Positiv-Tests OK, alle Negativ-Tests korrekt
+mit Fehler 1142/1143 abgewiesen. Spaltenrecht auf Password
+greift. Lauf reproduziert die dokumentierten Zeilenzahlen.
+============================================================

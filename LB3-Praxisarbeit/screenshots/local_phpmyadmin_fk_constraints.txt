@@ -1,0 +1,9 @@
++---------------------+----------------+-------------+--------------+-------------+-----------+-----------+
+| FK-Constraint       | Tabelle        | Spalte      | Ref-Tabelle  | Ref-Spalte  | ON UPDATE | ON DELETE |
++---------------------+----------------+-------------+--------------+-------------+-----------+-----------+
+| fk_buchung_land     | tbl_buchung    | Land_FS     | tbl_land     | Land_ID     | CASCADE   | RESTRICT  |
+| fk_buchung_personen | tbl_buchung    | Personen_FS | tbl_personen | Personen_ID | CASCADE   | RESTRICT  |
+| fk_pos_buchung      | tbl_positionen | Buchungs_FS | tbl_buchung  | Buchungs_ID | CASCADE   | RESTRICT  |
+| fk_pos_leistung     | tbl_positionen | Leistung_FS | tbl_leistung | LeistungID  | CASCADE   | RESTRICT  |
+| fk_pos_benutzer     | tbl_positionen | Benutzer_FS | tbl_benutzer | Benutzer_ID | CASCADE   | RESTRICT  |
++---------------------+----------------+-------------+--------------+-------------+-----------+-----------+

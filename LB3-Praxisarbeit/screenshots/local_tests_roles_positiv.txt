@@ -1,0 +1,35 @@
+giovanni@freya:~/lb3$  # ROLLEN-TESTS POSITIV - M141 LB3 - Giovanni Merola - 2026-07-02
+# User giovanni_benutzer (role_benutzer) / giovanni_manager (role_management)
+
+[A-00] giovanni_benutzer@localhost   aktive Rolle: role_benutzer
+[B-00] giovanni_manager@localhost    aktive Rolle: role_management
+[A-01 POSITIV] SELECT COUNT(*) tbl_personen  -> erwartet OK
+personen_sichtbar
+2036
+
+[A-02 POSITIV] UPDATE tbl_personen  -> erwartet OK
+geaendert
+1
+
+[A-05 POSITIV] SELECT erlaubte Spalten tbl_benutzer  -> erwartet OK
+Benutzer_ID	Benutzername	aktiv	deaktiviert
+1	admin	1	NULL
+2	mueller	1	NULL
+3	emueller	0	2001-12-01
+
+[A-07 POSITIV] INSERT/UPDATE/DELETE tbl_buchung  -> erwartet OK
+ergebnis
+insert+update+delete ok
+
+[B-01 POSITIV] SELECT COUNT(*) tbl_personen  -> erwartet OK
+COUNT(*)
+2036
+
+[B-02 POSITIV] INSERT+DELETE tbl_leistung  -> erwartet OK
+ergebnis
+insert+delete ok
+
+[B-03 POSITIV] UPDATE Password tbl_benutzer  -> erwartet OK
+geaendert
+1
+

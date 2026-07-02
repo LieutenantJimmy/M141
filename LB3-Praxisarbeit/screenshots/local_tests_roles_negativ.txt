@@ -1,0 +1,46 @@
+giovanni@freya:~/lb3$  # ROLLEN-TESTS NEGATIV (Zugriffsmatrix) - M141 LB3 - Giovanni Merola
+# Erwartet: ER 1142 (Tabelle verweigert) bzw. ER 1143 (Spalte verweigert)
+
+[A-03 NEGATIV] DELETE tbl_personen  -> erwartet FEHLER 1142
+--------------
+DELETE FROM tbl_personen WHERE Personen_ID=1
+--------------
+
+ERROR 1142 (42000) at line 1: DELETE command denied to user 'giovanni_benutzer'@'localhost' for table `backpacker_lb3_giovanni`.`tbl_personen`
+
+[A-04 NEGATIV] SELECT Password  -> erwartet FEHLER 1143 (Spalte gesperrt)
+--------------
+SELECT Password FROM tbl_benutzer LIMIT 1
+--------------
+
+ERROR 1143 (42000) at line 1: SELECT command denied to user 'giovanni_benutzer'@'localhost' for column 'Password' in table 'tbl_benutzer'
+
+[A-06 NEGATIV] UPDATE Spalte deaktiviert  -> erwartet FEHLER 1143
+--------------
+UPDATE tbl_benutzer SET deaktiviert=CURDATE() WHERE Benutzer_ID=1
+--------------
+
+ERROR 1143 (42000) at line 1: UPDATE command denied to user 'giovanni_benutzer'@'localhost' for column 'deaktiviert' in table 'tbl_benutzer'
+
+[A-08 NEGATIV] INSERT tbl_leistung  -> erwartet FEHLER 1142 (nur SELECT)
+--------------
+INSERT INTO tbl_leistung (Beschreibung) VALUES ('Sollte verboten sein')
+--------------
+
+ERROR 1142 (42000) at line 1: INSERT command denied to user 'giovanni_benutzer'@'localhost' for table `backpacker_lb3_giovanni`.`tbl_leistung`
+
+
+[B-04 NEGATIV] INSERT tbl_buchung  -> erwartet FEHLER 1142 (nur SELECT)
+--------------
+INSERT INTO tbl_buchung (Personen_FS,Ankunft,Abreise,Land_FS) VALUES (1,NOW(),NOW()+INTERVAL 1 DAY,1)
+--------------
+
+ERROR 1142 (42000) at line 1: INSERT command denied to user 'giovanni_manager'@'localhost' for table `backpacker_lb3_giovanni`.`tbl_buchung`
+
+[B-05 NEGATIV] UPDATE tbl_positionen  -> erwartet FEHLER 1142
+--------------
+UPDATE tbl_positionen SET Preis=0 WHERE Positions_ID=1
+--------------
+
+ERROR 1142 (42000) at line 1: UPDATE command denied to user 'giovanni_manager'@'localhost' for table `backpacker_lb3_giovanni`.`tbl_positionen`
+
