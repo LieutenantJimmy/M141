@@ -15,7 +15,7 @@
 #   export CLOUD_ADMIN_PWD="CloudAdmin!Giovanni-2026"
 #   ./migrate_local_to_selfhosted.sh
 # ============================================================
-set -euo pipefail
+set -Eeuo pipefail
 
 DB="backpacker_lb3_giovanni"
 CLOUD_HOST="192.168.1.62"
@@ -26,33 +26,47 @@ DCL="$(dirname "$0")/../dcl/04_selfhosted_cloud_users.sql"
 DUMPDIR="$(dirname "$0")/dumps"
 DUMP="$DUMPDIR/${DB}_$(date +%Y%m%d).sql"
 
+die() { printf '\nFEHLER (Zeile %s): %s\n' "${1:-?}" "${2:-abgebrochen}" >&2; exit 1; }
+trap 'die "$LINENO" "Migration abgebrochen"' ERR
+
+# ---- Preflight -----------------------------------------------------------
 : "${CLOUD_ADMIN_PWD:?Setze CLOUD_ADMIN_PWD (siehe Passwort-Manager)}"
+command -v mysql    >/dev/null 2>&1 || die "$LINENO" "mysql-Client fehlt"
+command -v mysqldump >/dev/null 2>&1 || die "$LINENO" "mysqldump fehlt"
+[ -f "$CA" ]  || die "$LINENO" "CA-Zertifikat nicht gefunden: $CA (von cloud-db-giovanni kopieren)"
+[ -f "$DCL" ] || die "$LINENO" "Cloud-DCL nicht gefunden: $DCL"
 LOCAL_PWD_ARG=""; [ -n "${LOCAL_PWD:-}" ] && LOCAL_PWD_ARG="-p${LOCAL_PWD}"
 mkdir -p "$DUMPDIR"
 
+# gemeinsame Cloud-Verbindungsargumente (TLS erzwungen + CA-Verifikation)
+CLOUD_ARGS=(-h "$CLOUD_HOST" -P "$CLOUD_PORT" -u "$CLOUD_USER" "-p${CLOUD_ADMIN_PWD}"
+            --ssl-verify-server-cert --ssl-ca="$CA")
+
+echo "==> 0) Preflight: TLS-Verbindung zur Cloud-DB testen"
+mysql "${CLOUD_ARGS[@]}" -e "SELECT 1;" >/dev/null 2>&1 \
+  || die "$LINENO" "keine TLS-Verbindung zu ${CLOUD_HOST}:${CLOUD_PORT} (Endpoint online? Firewall? CA korrekt?)"
+echo "    TLS-Verbindung OK"
+
 echo "==> 1) Cloud-DB anlegen (falls nicht vorhanden)"
-mysql -h "$CLOUD_HOST" -P "$CLOUD_PORT" -u "$CLOUD_USER" "-p${CLOUD_ADMIN_PWD}" \
-  --ssl-verify-server-cert --ssl-ca="$CA" \
+mysql "${CLOUD_ARGS[@]}" \
   -e "CREATE DATABASE IF NOT EXISTS $DB CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 
 echo "==> 2) Lokale DB dumpen -> $DUMP"
+# shellcheck disable=SC2086  # LOCAL_PWD_ARG ist bewusst wortgetrennt (leer = kein -p)
 mysqldump -u root $LOCAL_PWD_ARG \
   --single-transaction --routines --events \
   --default-character-set=utf8mb4 "$DB" > "$DUMP"
+[ -s "$DUMP" ] || die "$LINENO" "Dump ist leer - lokale DB '$DB' vorhanden?"
 echo "    Dump: $(du -h "$DUMP" | cut -f1)"
 
 echo "==> 3) Dump per TLS in die Cloud-DB einspielen"
-mysql -h "$CLOUD_HOST" -P "$CLOUD_PORT" -u "$CLOUD_USER" "-p${CLOUD_ADMIN_PWD}" \
-  --ssl-verify-server-cert --ssl-ca="$CA" \
-  --default-character-set=utf8mb4 "$DB" < "$DUMP"
+mysql "${CLOUD_ARGS[@]}" --default-character-set=utf8mb4 "$DB" < "$DUMP"
 
 echo "==> 4) Zugriffsberechtigungen (DCL) automatisiert übertragen"
-mysql -h "$CLOUD_HOST" -P "$CLOUD_PORT" -u "$CLOUD_USER" "-p${CLOUD_ADMIN_PWD}" \
-  --ssl-verify-server-cert --ssl-ca="$CA" "$DB" < "$DCL"
+mysql "${CLOUD_ARGS[@]}" "$DB" < "$DCL"
 
 echo "==> 5) Smoke-Test: Zeilenzahlen + TLS-Status"
-mysql -h "$CLOUD_HOST" -P "$CLOUD_PORT" -u "$CLOUD_USER" "-p${CLOUD_ADMIN_PWD}" \
-  --ssl-verify-server-cert --ssl-ca="$CA" "$DB" -t \
+mysql "${CLOUD_ARGS[@]}" "$DB" -t \
   -e "SELECT 'tbl_personen' t, COUNT(*) c FROM tbl_personen
       UNION ALL SELECT 'tbl_benutzer',   COUNT(*) FROM tbl_benutzer
       UNION ALL SELECT 'tbl_land',       COUNT(*) FROM tbl_land

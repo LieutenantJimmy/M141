@@ -18,7 +18,7 @@ Die SQL-Befehle der Tests sind in `sql/dql/60_tests_roles.sql` und `sql/dql/50_d
 
 | TC | Aktion | Erwartet | Resultat |
 |---|---|---|---|
-| A-01 | `SELECT * FROM tbl_personen` | OK, Liste Gäste | ✅ 2035 Zeilen |
+| A-01 | `SELECT * FROM tbl_personen` | OK, Liste Gäste | ✅ 2036 Zeilen (inkl. Migrations-Testdatensatz; Basis 2035, siehe §4) |
 | A-02 | `UPDATE tbl_personen SET Telefon='+41000' WHERE Personen_ID=1` | OK, 1 row affected | ✅ |
 | A-03 | `DELETE FROM tbl_personen WHERE Personen_ID=1` | ER 1142 (Access denied) | ✅ Error 1142 |
 | A-04 | `SELECT Password FROM tbl_benutzer` | ER 1143 (column denied) | ✅ Error 1143 |
@@ -62,7 +62,7 @@ Alle Abfragen aus `sql/dql/50_data_consistency.sql`.
 
 | TC | Prüfung | Erwartet | Beobachtet |
 |---|---|---|---|
-| T-D-01 | Zeilenzahlen nach Bereinigung (vor Testdaten) | personen=2035, benutzer=10, land=81, leistung=7, buchung=1005, positionen=1745 | ✅ exakt (siehe `screenshots/local_tests_data.txt`) |
+| T-D-01 | Zeilenzahlen im Testlauf (Reihenfolge Import → Bereinigung → Testdatensatz → Tests) | personen=2036, benutzer=11, land=82, leistung=8, buchung=1006, positionen=1746 | ✅ exakt (siehe `screenshots/local_tests_data.txt`; Basiszahlen *vor* Testdatensatz 2035/10/81/7/1005/1745 in §4) |
 | T-D-02 | Verwaiste Buchungen ohne Person | 0 | ✅ 0 |
 | T-D-03 | `Land_FS=0` (Sentinel) | 0 (durch Cleanup → NULL gesetzt) | ✅ 0 (438 Sentinel-Werte vor Cleanup eliminiert) |
 | T-D-04 | Positionen ohne Buchung | 0 | ✅ 0 |

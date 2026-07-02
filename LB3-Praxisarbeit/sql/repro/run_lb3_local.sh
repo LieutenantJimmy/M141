@@ -150,7 +150,7 @@ echo "### Backup: mysqldump (Struktur + Daten) ###"
 mysqldump --databases "$DB" --routines --events --single-transaction \
   --default-character-set=utf8mb4 > "$BASE/backpacker_lb3_giovanni_dump.sql" 2>>"$OUT/dump_err.txt"
 gzip -kf "$BASE/backpacker_lb3_giovanni_dump.sql"
-ls -l "$BASE"/backpacker_lb3_giovanni_dump.sql* | tee "$OUT/dump_info.txt"
+du -h "$BASE/backpacker_lb3_giovanni_dump.sql" "$BASE/backpacker_lb3_giovanni_dump.sql.gz" | tee "$OUT/dump_info.txt"
 
 echo "### FERTIG. Outputs in $OUT ###"
-ls -l "$OUT"
+find "$OUT" -maxdepth 1 -type f -printf '%s\t%p\n' | sort -k2

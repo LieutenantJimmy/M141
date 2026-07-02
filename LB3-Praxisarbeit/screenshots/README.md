@@ -14,6 +14,13 @@ Hier liegen die personalisierten Nachweise (mit sichtbarem "giovanni"), die zur 
 | `local_tests_roles_negativ.png` / `.txt` | Negativ-Tests mit echten `ERROR 1142` / `ERROR 1143` | MariaDB CLI |
 
 *Die beiden `phpmyadmin_*`-Bilder tragen den historischen XAMPP-Dateinamen, zeigen bei der Reproduktion aber die äquivalente CLI-Ausgabe aus `information_schema` (gleiche Nachweis-Aussage).*
+
+> **Zwei Nachweis-Stände (bewusst dokumentiert).** `screenshots/local_test_run_giovanni_2026-06-30.txt` ist der **ursprüngliche Abgabe-Lauf vom 30.06.2026** (MariaDB 10.6). Der kanonische, aktuelle Nachweis-Satz sind die `local_tests_*` / `local_users_grants` / `local_phpmyadmin_*` (Reproduktion 02.07.2026 auf MariaDB 11.8). **Beide zeigen identische Ergebnisse** (2036/11/82/8/1006/1746). Einziger Darstellungsunterschied: der 30.06-Lauf weist die Prüfung noch unter dem kombinierten Alias `verletzte_checks = 22` aus; im kanonischen `local_tests_data.txt` ist sie zur Klarheit in **`rabatt_check_verletzt = 0`** (erzwungener CHECK) und **`stornos_zeilen_total = 22`** (bewusst erlaubte negative Anzahl/Preis) aufgeteilt — dieselben 22 Zeilen, kein Fehler.
+
+**Cloud-Nachweise:**
+
+| Datei | Inhalt | Quelle |
+|---|---|---|
 | `cloud_rds_dashboard.png` | Aiven-Konsole: Service `backpacker-aiven-giovanni-giovannimerola1`, Status Running (do-ams) | Aiven Console |
 | `cloud_rds_konfiguration.png` | "Connection information"-Card: Host, Port, User, DB sichtbar (Passwort maskiert) | Aiven Console |
 | `cloud_rds_security_group.png` | "Allowed inbound IP addresses" mit eigener IP/32 (kein 0.0.0.0/0) | Aiven Console |

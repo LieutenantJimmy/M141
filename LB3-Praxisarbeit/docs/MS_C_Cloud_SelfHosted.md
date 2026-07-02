@@ -99,15 +99,67 @@ freya-Störung eindrücklich zeigt.
 > **Deshalb MUSS die Recovery an der Konsole mit dem Firewall-Stop beginnen,
 > BEVOR irgendetwas anderes passiert** — sonst droht erneuter Aussperr-Effekt.
 
-1. **ZUERST an der Host-Konsole:** `pve-firewall stop`
-   *(dann in `/etc/pve/firewall/cluster.fw` `enable: 0` setzen und die Regeln
-   prüfen, bevor die Firewall ggf. kontrolliert wieder aktiviert wird).*
-2. freya-Erreichbarkeit prüfen: `ping 192.168.1.32`, dann Web-UI `https://192.168.1.32:8006` und SSH.
-3. Setup ausführen: `pct exec 9002 -- bash /root/setup_cloud_selfhosted.sh`.
-4. Migration: `sql/migration/migrate_local_to_selfhosted.sh` (Struktur+Daten+DCL, alles per TLS).
-5. Cloud-Tests: `sql/dql/70_tests_cloud.sql` gegen `192.168.1.62` und Screenshots
-   `cloud_*.png` mit sichtbarem `giovanni` erstellen (siehe `screenshots/README.md`).
+### 6.1 Voraussetzung: freya physisch neu starten
+
+freya reagiert nicht auf ARP/Ping/8006 — der Host ist auf L2 verschwunden. Er
+erholt sich **nicht von selbst** und muss von Giovanni per **BMC/IPMI oder
+physischem Power-Cycle** neu gestartet werden. Der BMC lehnt unsere gespeicherten
+Zugangsdaten ab, daher ist kein Remote-Reset durch das Automations-Tooling
+möglich. Ohne diesen Neustart ist keiner der folgenden Schritte durchführbar.
+
+### 6.2 Recovery-Reihenfolge (Firewall-Stop ZUERST)
+
+Es gibt zwei Wege — der Orchestrator macht Schritt 0–3 automatisch:
+
+**Variante A (empfohlen): Orchestrator-Script auf dem Host.**
+Das Script [`sql/repro/recover_and_deploy_freya.sh`](../sql/repro/recover_and_deploy_freya.sh)
+hat die korrekte Reihenfolge fest eingebaut — es ruft **als allererstes**
+`pve-firewall stop` auf, setzt `cluster.fw enable:0`, prüft/startet CT 9002 und
+führt dann das Setup im Container aus:
+
+```bash
+# auf dem freya-Host, als root, nach dem Neustart:
+/root/recover_and_deploy_freya.sh            # Firewall-Stop + CT-Check + Setup
+/root/recover_and_deploy_freya.sh --migrate  # zusätzlich Migrations-Hinweis
+```
+
+**Variante B: manuell, Schritt für Schritt.**
+
+1. **ZUERST an der Host-Konsole (noVNC/iKVM):** `pve-firewall stop`
+   — danach `sed -i 's/enable: 1/enable: 0/' /etc/pve/firewall/cluster.fw`,
+   Regeln prüfen, bevor die Firewall *kontrolliert* wieder aktiviert wird.
+   Grund: das Aktivieren dieser Firewall ist der Verdachts-Auslöser des Aussperr.
+2. Erreichbarkeit prüfen: `ping 192.168.1.32`, Web-UI `https://192.168.1.32:8006`, SSH.
+3. Container prüfen/starten: `pct status 9002` (ggf. `pct start 9002`).
+4. Setup (idempotent): `pct push 9002 setup_cloud_selfhosted.sh /root/ && pct exec 9002 -- bash /root/setup_cloud_selfhosted.sh`.
+5. CA-Cert aus dem CT holen (für die Migration): `pct pull 9002 /etc/mysql/certs/ca.pem ./cloud-ca-giovanni.pem`.
+6. Migration: `export CLOUD_ADMIN_PWD=…; sql/migration/migrate_local_to_selfhosted.sh` (Struktur + Daten + DCL, alles per TLS).
+
+### 6.3 Verifikation & Screenshots (Urheberbeweis)
+
+Nach dem Deploy die Cloud-Nachweise `cloud_*.png` mit sichtbarem `giovanni`
+erstellen (Liste in `screenshots/README.md`). Mindestnachweise:
+
+```bash
+# TLS-Login OK (positiv) -> cloud_verbindung_giovanni.png
+mysql -h 192.168.1.62 -u giovanni_dba -p --ssl-verify-server-cert \
+      --ssl-ca=cloud-ca-giovanni.pem backpacker_lb3_giovanni -e "SELECT CURRENT_USER();"
+
+# Klartext wird abgewiesen (negativ, TLS-Pflicht) -> cloud_tls_required.png
+mysql -h 192.168.1.62 -u giovanni_dba -p --ssl-mode=DISABLED -e "SELECT 1;"
+#   erwartet: "ERROR 1045 / Access denied ... secure transport required"
+
+# Cloud-Tests + Zeilenzahlen -> cloud_tests_data.png
+mysql -h 192.168.1.62 -u giovanni_dba -p --ssl-ca=cloud-ca-giovanni.pem \
+      backpacker_lb3_giovanni < sql/dql/70_tests_cloud.sql
+```
+
+### 6.4 Rollback / Aufräumen
+
+- Setup ist idempotent — erneutes Ausführen ist gefahrlos.
+- Rückbau der Test-Umgebung: `pct stop 9002 && pct destroy 9002` (entfernt die
+  Cloud-DB vollständig). Firewall-Zustand des Hosts danach bewusst wieder setzen.
 
 ---
 
-*Sign-off Setup-Bauplan: Giovanni Merola, 02.07.2026. Live-Deployment ausstehend (freya offline).*
+*Sign-off Setup-Bauplan: Giovanni Merola, 02.07.2026. Live-Deployment ausstehend (freya offline, wartet auf BMC-Power-Cycle).*
