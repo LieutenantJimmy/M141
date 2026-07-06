@@ -60,7 +60,7 @@ LB3-Praxisarbeit/
 ├── README_Praxisarbeit.md          ← Diese Datei (Projekt-Index)
 ├── .gitignore                      ← OS/Office-Junk und Secrets ausgeschlossen
 ├── cleanup_before_upload.ps1       ← Helper zum Aufräumen vor GitLab-Upload
-├── M141 LB3 Bewertung LE.xlsx      ← Selbsteinschätzungs-Matrix (Note 5.95)
+├── M141 LB3 Bewertung LE.xlsx      ← Selbsteinschätzungs-Matrix (Partnerarbeit, Note 5.77)
 ├── backpacker_lb3_giovanni_dump.sql(.gz) ← DB-Dump (Backup, Struktur+Daten) — Abgabe-Deliverable
 ├── backpacker_ddl_lb3.sql          ← Original-DDL der Quell-DB
 ├── backpacker_lb3.png              ← Original-ERD der Quell-DB
@@ -205,7 +205,9 @@ Detaillierte Schritte mit Screenshots: siehe `docs/STEP_BY_STEP_GUIDE.md` und `d
 
 ## 7. Selbsteinschätzung
 
-Siehe `M141 LB3 Bewertung LE.xlsx` (B4 = Giovanni Merola, D28 = 43.5, **Note D30 = 5.95**).
+Siehe `M141 LB3 Bewertung LE.xlsx` (B4 = Giovanni Merola, D28 = 41.5, **Note D30 = 5.77**).
+
+**Arbeitsform: Partnerarbeit** — die Präsentation/Demo erfolgt gemeinsam mit Agustin (gemäss LB3-Rahmen zulässig). Der Einzelarbeit-Bonus (+2P, Zelle D4) wird entsprechend **nicht** beansprucht (D4 = 0).
 
 Begründung der Selbsteinstufung pro Zeile inkl. konkreter Artefakt-Referenz: ebd. Kommentar-Spalte.
 
