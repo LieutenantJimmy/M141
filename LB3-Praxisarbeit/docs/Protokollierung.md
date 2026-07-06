@@ -13,7 +13,7 @@
 | MS B 1.3 – DCL (Roles) | `sql/dcl/01_roles_users.sql` | ✅ |
 | MS B 1.4 – DDL/Import/Cleanup | `sql/ddl/*`, `sql/dml/*` | ✅ |
 | MS B 1.5 – Testprotokolle lokal | `docs/MS_B_1_5_Testprotokolle.md` | ✅ |
-| MS C – Cloud-Setup | `docs/MS_C_Cloud_Setup.md`, `config/my_aiven.cnf` | ✅ |
+| MS C – Cloud-Setup (produktiv: eigene Cloud) | `docs/MS_C_Cloud_SelfHosted.md`, `config/my_cloud_selfhosted.cnf` *(Aiven evaluiert: `MS_C_Cloud_Setup.md`)* | ✅ |
 | MS D – Migration | `docs/MS_D_Migration.md`, `sql/migration/*` | ✅ |
 | Kapitel 4 – Protokollierung | dieser Text | ✅ |
 | Demo-Script | `docs/Demo_Skript.md` | ✅ |
@@ -32,7 +32,10 @@
 | 12.05.2026 | – | Aiven Instanz `backpacker-aiven-giovanni` aufgesetzt, gehärtet | `MS_C_Cloud_Setup.md` + Screenshots |
 | 13.05.2026 | – | Migration-Wrapper + DCL-Apply + Cloud-Tests | `migrate_local_to_cloud.sh`, `70_tests_cloud.sql` |
 | 14.05.2026 | – | Demo-Drill, Bewertungsmatrix-Selbsteinschätzung | `Demo_Skript.md` |
-| 30.06.2026 | T10 | Endabnahme, Repo-Commit, Demo vor LP | – |
+| 30.06.2026 | T10 | Endabnahme, Repo-Commit | – |
+| 02.07.2026 | – | Lokale Pipeline auf frischer MariaDB reproduziert; **Pivot zur eigenen Cloud** (Aiven evaluiert, bewusst verworfen — Max-Bonus «eigene Cloud-DB»); erster Ziel-Host freya fiel aus | `Reproduktion_Lokal.md`, `MS_C_Cloud_SelfHosted.md` |
+| 06.07.2026 | – | Eigene Cloud LIVE deployt (LXC `cloud-db-giovanni`, TLS erzwungen, Allowlist); Migration per TLS + alle Cloud-Nachweise | `screenshots/cloud_*`, `migrate_local_to_selfhosted.sh` |
+| 07.07.2026 | – | Rigor-Audit (Idempotenz 2×, 8 Härtungs-Proben, Grants) + Demo-Preflight + Golden Snapshot | `VERIFICATION.md`, `preflight_demo.sh` |
 
 ## 3. Repository-Struktur
 
@@ -78,7 +81,8 @@ m141-main-LB3-Praxisarbeit/
     │       ├── migrate_local_to_cloud.sh
     │       └── migrate_local_to_cloud.ps1
     ├── config/
-    │   ├── my_aiven.cnf                (produktiv, Aiven)
+    │   ├── my_cloud_selfhosted.cnf     (produktiv — eigene Cloud)
+    │   ├── my_aiven.cnf                (Aiven — evaluiert, verworfen)
     │   └── my_aws.cnf                  (historisch, AWS-Variante)
     ├── prompts/
     │   └── ki_prompts.md
@@ -113,17 +117,17 @@ mysql -u root -p backpacker_lb3_giovanni < sql/dql/50_data_consistency.sql
 mysql -u giovanni_benutzer -p backpacker_lb3_giovanni < sql/dql/60_tests_roles.sql
 mysql -u giovanni_manager  -p backpacker_lb3_giovanni < sql/dql/60_tests_roles.sql
 
-# 7. Migration in die Cloud
-export CLOUD_HOST=backpacker-aiven-giovanni-giovannimerola1.h.aivencloud.com
-export CLOUD_PORT=13544
-export CLOUD_USER=avnadmin
-export CLOUD_PWD='__PWD__'   # paste from Aiven Console -> Service -> "Show password"
-bash sql/migration/migrate_local_to_cloud.sh
+# 7. Migration in die eigene Cloud (PRODUKTIV)
+export CLOUD_ADMIN_PWD='__PWD__'   # giovanni_admin, siehe Passwort-Manager
+bash sql/migration/migrate_local_to_selfhosted.sh
 
-# 8. Cloud-Tests
-mysql -h $CLOUD_HOST -u $CLOUD_USER -p$CLOUD_PWD \
-      --ssl-mode=REQUIRED --ssl-ca=aiven-ca.pem \
+# 8. Cloud-Tests (eigene Cloud, TLS mit eigener CA)
+mysql -h 192.168.1.62 -u giovanni_admin -p$CLOUD_ADMIN_PWD \
+      --ssl-verify-server-cert --ssl-ca=sql/migration/cloud-ca-giovanni.pem \
       backpacker_lb3_giovanni < sql/dql/70_tests_cloud.sql
+
+# (Evaluierte Aiven-Alternative — nicht produktiv: migrate_local_to_cloud.sh
+#  mit CLOUD_HOST/CLOUD_PWD gegen den Aiven-Endpoint; bewusst verworfen.)
 ```
 
 ## 5. Abnahme-Kriterien (Self-Check)
@@ -136,7 +140,7 @@ mysql -h $CLOUD_HOST -u $CLOUD_USER -p$CLOUD_PWD \
 | FA-04 | Rollen aktiv | ✅ |
 | FA-05 | min. 1 User pro Rolle | ✅ |
 | FA-06 | Testprotokolle | ✅ |
-| FA-07 | Aiven gehärtet | ✅ |
+| FA-07 | Cloud-DB gehärtet (eigene Cloud; Aiven nur evaluiert) | ✅ |
 | FA-08 | Automatische Migration | ✅ |
 | FA-09 | DCL automatisiert | ✅ |
 | FA-10 | Cloud-Testprotokolle | ✅ |

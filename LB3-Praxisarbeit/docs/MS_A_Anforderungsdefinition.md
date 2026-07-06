@@ -3,6 +3,13 @@
 *Autor: Giovanni Merola · Klasse M141 · LB3 Praxisarbeit · Datum: 30.06.2026*
 *Personalisierte DB: `backpacker_lb3_giovanni`*
 
+> **Hinweis Cloud-Ziel (Update 06.07.2026):** Die Anforderungen unten nennen als
+> Cloud-Ziel noch **Aiven** (Stand der damaligen Evaluation). Aiven wurde evaluiert,
+> aber bewusst zugunsten der **eigenen Homelab-Cloud** verworfen — volle Kontrolle,
+> kein Vendor-Lock, Max-Bonus. Alle Cloud-Anforderungen (FA-07..10, NFA-01..04)
+> werden von der eigenen Cloud **erfüllt oder übertroffen** — live belegt in
+> `VERIFICATION.md` (TLS erzwungen, IP-Allowlist mit Default-Deny, Snapshot-Backup).
+
 ---
 
 ## 1. Ausgangslage

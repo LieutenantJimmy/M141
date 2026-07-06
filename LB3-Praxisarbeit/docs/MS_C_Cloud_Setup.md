@@ -1,4 +1,4 @@
-# MS C – Cloud-DBMS (Aiven for MySQL) Setup & Betrieb
+# MS C – Cloud-DBMS (Aiven for MySQL) — EVALUIERTE ALTERNATIVE, nicht produktiv
 
 *Autor: Giovanni Merola · M141 · LB3 · 30.06.2026*
 

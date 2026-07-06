@@ -1,3 +1,8 @@
+# ============================================================================
+# EVALUIERTE ALTERNATIVE (Aiven) — NICHT PRODUKTIV. Aiven wurde evaluiert, aber
+# bewusst zugunsten der eigenen Homelab-Cloud verworfen (volle Kontrolle, kein
+# Vendor-Lock, Max-Bonus). Produktive Konfiguration: my_cloud_selfhosted.cnf
+# ============================================================================
 # ============================================================
 # my_aiven.cnf – Produktive Parameter für Aiven for MySQL
 # Service: backpacker-aiven-giovanni

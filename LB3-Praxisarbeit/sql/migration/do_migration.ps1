@@ -1,4 +1,5 @@
 # ============================================================
+# EVALUIERTE AIVEN-VARIANTE - NICHT PRODUKTIV. Produktiv: ../migration/migrate_local_to_selfhosted.sh (eigene Cloud).
 # do_migration.ps1 — Wrapper that runs the full Aiven migration
 # in one shot. Run once from PowerShell.
 # Autor: Giovanni Merola · M141 LB3

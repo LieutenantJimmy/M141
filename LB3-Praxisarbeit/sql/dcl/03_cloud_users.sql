@@ -1,6 +1,7 @@
 -- ============================================================
 -- M141 LB3 – Backpacker_LB3 – Giovanni Merola (CLOUD-Variante)
--- 03_cloud_users.sql
+-- 03_cloud_users.sql  (EVALUIERTE AIVEN-VARIANTE - nicht produktiv;
+--                     produktiv: 04_selfhosted_cloud_users.sql, eigene Cloud)
 -- Cloud-DCL für Aiven for MySQL 8:
 --   Rollen + User mit REQUIRE SSL und %-Host.
 -- Auszuführen NACHDEM die Schema-Migration in die Cloud-DB

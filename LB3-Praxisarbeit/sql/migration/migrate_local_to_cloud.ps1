@@ -1,4 +1,5 @@
 # ============================================================
+# EVALUIERTE AIVEN-VARIANTE - NICHT PRODUKTIV. Produktiv: migrate_local_to_selfhosted.sh (eigene Cloud).
 # M141 LB3 – Backpacker_LB3 – Giovanni Merola
 # migrate_local_to_cloud.ps1
 # Windows-Variante des Migrations-Scripts (PowerShell).

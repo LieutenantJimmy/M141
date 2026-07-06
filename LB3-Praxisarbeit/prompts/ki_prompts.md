@@ -3,6 +3,8 @@
 Diese Datei dokumentiert die wesentlichen Prompts, die im Verlauf der LB3-Praxisarbeit gegenüber KI-Assistenten (z. B. Claude / ChatGPT) verwendet wurden. Sie dient der Nachvollziehbarkeit (Punkt "Urheberbeweis" im Rahmen).
 
 > **Hinweis zur Provider-Pivot:** Der ursprüngliche Prompt A-01 spricht noch von "AWS-Cloud", weil das die initiale Annahme war. Nach Klärung der Zugriffsrechte (kein TBZ-AWS-Account verfügbar, siehe `MS_A_Cloud_Evaluation.md`) wurde der Cloud-Anbieter auf **Aiven for MySQL** gewechselt. Die alten Prompts werden bewusst nicht nachträglich umgeschrieben, um die Iterations-Historie ehrlich abzubilden.
+>
+> **Finale Pivot (06.07.2026):** Aiven wurde evaluiert, aber bewusst zugunsten der **eigenen Homelab-Cloud** verworfen (volle Kontrolle, kein Vendor-Lock, Max-Bonus «eigene Cloud-DB»). Die Aiven-bezogenen Prompts (Abschnitte E/F) bleiben als ehrliche Historie erhalten. Für die eigene Cloud kamen KI-gestützt hinzu: Setup-/Härtungs-Skript (`sql/repro/setup_cloud_selfhosted.sh`), Cloud-DCL (`04_selfhosted_cloud_users.sql`), TLS-Migrations-Wrapper (`migrate_local_to_selfhosted.sh`), Demo-Preflight (`preflight_demo.sh`) und das Live-Audit (`VERIFICATION.md`).
 
 Format: **#** · *Phase* · *Prompt* · *Output-Datei*
 

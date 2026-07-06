@@ -75,7 +75,15 @@ Skala 1 (schlecht) – 5 (sehr gut).
 
 ## 4. Entscheidung
 
-→ **Aiven for MySQL 8 · Service `backpacker-aiven-giovanni` · Region Amsterdam (Hobbyist Free-Trial)** als Cloud-Zielsystem.
+> **⚠ Finaler Entscheid (Update 06.07.2026): EIGENE CLOUD.** Die untenstehende
+> Aiven-Entscheidung war das Ergebnis dieser Provider-Evaluation — **Aiven wurde
+> evaluiert, aber bewusst zugunsten der eigenen Homelab-Cloud verworfen** (volle
+> Kontrolle über TLS/Zertifikate/Firewall, kein Vendor-Lock, und gemäss
+> LB3-Rahmen die **Max-Bonus-Option** «eigene Cloud-DB»). Produktiv deployt und
+> live verifiziert: `docs/MS_C_Cloud_SelfHosted.md` + `VERIFICATION.md`.
+> Der Aiven-Abschnitt bleibt als Nachweis der Evaluationstiefe erhalten.
+
+→ *(evaluiert)* **Aiven for MySQL 8 · Service `backpacker-aiven-giovanni` · Region Amsterdam (Hobbyist Free-Trial)** als damaliges Cloud-Zielsystem.
 
 **Begründung**:
 

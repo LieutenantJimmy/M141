@@ -2,7 +2,7 @@
 
 **Autor:** Giovanni Merola &nbsp;·&nbsp; **Klasse:** M141 &nbsp;·&nbsp; **Schule:** TBZ &nbsp;·&nbsp; **Abgabe:** 30.06.2026
 
-> **Ziel.** Die Backpacker-Hostel-Datenbank von Access auf MariaDB migrieren — zuerst lokal (XAMPP/MariaDB), dann in die Cloud (**Aiven for MySQL**, Region `do-ams`). Inklusive Normalisierung auf 2.NF, Datenbereinigung, Rollenkonzept mit Spaltenrechten, Tests, automatisierte Migration mit TLS und vollständige Dokumentation.
+> **Ziel.** Die Backpacker-Hostel-Datenbank von Access auf MariaDB migrieren — zuerst lokal (XAMPP/MariaDB), dann in die **eigene, selbst gehostete Cloud** (MariaDB-LXC auf dem Proxmox-Homelab, TLS erzwungen). Inklusive Normalisierung auf 2.NF, Datenbereinigung, Rollenkonzept mit Spaltenrechten, Tests, automatisierte Migration mit TLS und vollständige Dokumentation. *(Aiven wurde evaluiert, aber bewusst zugunsten der eigenen Homelab-Cloud verworfen — volle Kontrolle, kein Vendor-Lock, Max-Bonus.)*
 
 ---
 
@@ -12,10 +12,10 @@ Für den Einstieg empfehle ich diese Reihenfolge:
 
 1. **`README_Praxisarbeit.md`** *(diese Datei)* — Index und Bewertungs-Mapping
 2. **`docs/MS_A_Anforderungsdefinition.md`** — SMART-Anforderungen
-3. **`docs/MS_A_Cloud_Evaluation.md`** — Provider-Vergleich + Pivot AWS → Aiven
+3. **`docs/MS_A_Cloud_Evaluation.md`** — Provider-Vergleich (AWS → Aiven → **eigene Cloud**)
 4. **`docs/MS_B_1_1_ERD_2NF.md`** — Schema-Normalisierung
 5. **`docs/MS_B_1_2_Zugriffsmatrix.md`** — Rollen & Rechte
-6. **`docs/MS_C_Cloud_Setup.md`** — Aiven-Service-Setup & Härtung
+6. **`docs/MS_C_Cloud_SelfHosted.md`** — **eigene Cloud: Setup, Härtung, Live-Nachweise (produktiv)** — *(`MS_C_Cloud_Setup.md` = evaluierte Aiven-Alternative)*
 7. **`docs/MS_D_Migration.md`** — Migration & Cloud-Tests
 8. **`docs/Demo_Skript.md`** — Reihenfolge der 14-Minuten-Demo
 9. **`docs/Fazit.md`** — Lessons learned
@@ -66,7 +66,7 @@ LB3-Praxisarbeit/
 ├── backpacker_lb3_giovanni_dump.sql(.gz) ← DB-Dump (Backup, Struktur+Daten) — Abgabe-Deliverable
 ├── backpacker_ddl_lb3.sql          ← Original-DDL der Quell-DB
 ├── backpacker_lb3.png              ← Original-ERD der Quell-DB
-├── ca.pem                          ← Aiven CA-Zertifikat (TLS, öffentlich)
+├── ca.pem                          ← Aiven-CA (evaluierte Alternative; produktiv: sql/migration/cloud-ca-giovanni.pem)
 │
 ├── docs/                           ← Markdown-Dokumentation pro Meilenstein
 │   ├── MS_A_Anforderungsdefinition.md
@@ -96,7 +96,8 @@ LB3-Praxisarbeit/
 │   ├── dcl/
 │   │   ├── 01_roles_users.sql      ← Lokale Rollen & User
 │   │   ├── 02_revoke_all.sql       ← Vorab-Reset
-│   │   └── 03_cloud_users.sql      ← Cloud (MySQL 8) inkl. REQUIRE SSL
+│   │   ├── 03_cloud_users.sql      ← Aiven-Variante (evaluiert, MySQL 8)
+│   │   └── 04_selfhosted_cloud_users.sql ← eigene Cloud (PRODUKTIV, REQUIRE SSL)
 │   ├── dql/
 │   │   ├── 50_data_consistency.sql ← Lokale Daten-Konsistenz-Tests
 │   │   ├── 60_tests_roles.sql      ← Rollen-Tests positiv/negativ
@@ -110,7 +111,8 @@ LB3-Praxisarbeit/
 │       ├── do_migration.ps1            ← One-Shot-Wrapper (PowerShell)
 │       ├── migrate_local_to_cloud.ps1  ← Detaillierte PS-Migration
 │       ├── migrate_local_to_cloud.sh   ← Bash-Variante (Linux/macOS)
-│       └── aiven-ca.pem                ← TLS-CA-Cert für mysql --ssl-ca
+│       ├── aiven-ca.pem                ← Aiven-CA (evaluierte Alternative)
+│       └── cloud-ca-giovanni.pem       ← CA der eigenen Cloud (produktiv)
 │
 ├── csv/                            ← Quelldaten als CSV (Access-Export)
 │   ├── tbl_personen.csv
@@ -121,7 +123,8 @@ LB3-Praxisarbeit/
 │   └── tbl_leistung.csv
 │
 ├── config/
-│   ├── my_aiven.cnf                ← Aiven "Advanced configuration" dokumentiert
+│   ├── my_cloud_selfhosted.cnf     ← eigene Cloud (PRODUKTIV)
+│   ├── my_aiven.cnf                ← Aiven-Variante (evaluiert, nicht produktiv)
 │   └── my_aws.cnf                  ← Historisch (geplante AWS-Variante, nicht produktiv)
 │
 ├── prompts/
@@ -154,13 +157,13 @@ LB3-Praxisarbeit/
 | Asset | Wert |
 |---|---|
 | Datenbank-Name | `backpacker_lb3_giovanni` |
-| Aiven-Project | `giovanni-m141-lb3` |
-| Aiven-Service | `backpacker-aiven-giovanni-giovannimerola1` |
-| Cloud-Region | `do-ams` (Amsterdam) |
-| Cloud-Master-User | `avnadmin` (Aiven-Default) |
+| Cloud-Server (produktiv) | LXC `cloud-db-giovanni` (CT 9003, Proxmox-Homelab) |
+| Cloud-Endpoint | `192.168.1.62:3306` (TLS erzwungen, eigene CA `Giovanni-Merola-Cloud-CA`) |
+| Cloud-Admin-User | `giovanni_admin` (REQUIRE SSL) |
 | Anwendungs-User | `giovanni_benutzer`, `giovanni_manager`, `giovanni_dba` |
 | Personalisierter Test-Datensatz | `Giovanni-Test` in `tbl_personen` (siehe `sql/dml/40_testdaten_migration.sql`) |
 | Migrations-Test-Leistung | "Migrations-Testleistung Giovanni" in `tbl_leistung` |
+| *(evaluiert, nicht produktiv)* Aiven-Service | `backpacker-aiven-giovanni…` (`do-ams`, `avnadmin`) — bewusst zugunsten der eigenen Cloud verworfen |
 
 ---
 
@@ -180,27 +183,28 @@ mysql -u root -p backpacker_lb3_giovanni < sql/dml/40_testdaten_migration.sql
 mysql -u root -p backpacker_lb3_giovanni < sql/dql/50_data_consistency.sql
 ```
 
-### 5.2 Migration in die Cloud (Aiven)
+### 5.2 Migration in die eigene Cloud (produktiv)
 
-```powershell
+```bash
 # Passwort einmalig setzen (NICHT committen):
-$env:CLOUD_PWD = "AVNS_..."        # aus Aiven Console "Show password"
+export CLOUD_ADMIN_PWD='...'       # giovanni_admin (siehe Passwort-Manager)
 
-cd sql\migration
-.\do_migration.ps1
+sql/migration/migrate_local_to_selfhosted.sh   # Dump + Restore + DCL, alles per TLS
 ```
 
-Detaillierte Schritte mit Screenshots: siehe `docs/STEP_BY_STEP_GUIDE.md` und `docs/MS_D_Migration.md`.
+Details + Live-Beweise: `docs/MS_C_Cloud_SelfHosted.md`, `docs/MS_D_Migration.md`, `VERIFICATION.md`.
+
+*(Evaluierte Aiven-Alternative — nicht produktiv: `sql/migration/do_migration.ps1` mit `$env:CLOUD_PWD`; Schritte in `docs/STEP_BY_STEP_GUIDE.md`.)*
 
 ---
 
 ## 6. Sicherheits-Hinweise
 
-- **Keine produktiven Passwörter im Repo.** Das Aiven-Master-Passwort lebt ausschliesslich im Aiven-Console (und im Passwort-Manager). Der Migrationsskript erwartet es als `$env:CLOUD_PWD` zur Laufzeit.
-- **`ca.pem` ist das öffentliche CA-Zertifikat von Aiven** und somit kein Geheimnis. Es dient zur TLS-Validierung und wird intentional eingecheckt.
-- **DB-User-Passwörter (`Cloud!Benutzer-Giovanni-2026` u. a.)** sind Demo-Credentials, die das Bewertungs-Schema verlangt (funktionierender DCL-Lauf). Diese werden unmittelbar nach der LB3-Demo rotiert oder durch Termination des Aiven-Services entwertet.
-- **IP-Allowlist** ist auf die eigene öffentliche IP/32 beschränkt (kein `0.0.0.0/0`). Siehe `screenshots/cloud_rds_security_group.png`.
-- **TLS service-level erzwungen** durch Aiven (`require_secure_transport = ON`). Zusätzlich `REQUIRE SSL` auf jedem App-User.
+- **Keine produktiven Passwörter im Repo.** Das Cloud-Admin-Passwort (`giovanni_admin`) lebt im Passwort-Manager; das Migrationsskript erwartet es als `CLOUD_ADMIN_PWD` zur Laufzeit.
+- **`sql/migration/cloud-ca-giovanni.pem` ist das öffentliche CA-Zertifikat der eigenen Cloud** — kein Geheimnis, dient zur TLS-Validierung, bewusst eingecheckt. *(`ca.pem` im Root + `sql/migration/aiven-ca.pem` = öffentliche Aiven-CA aus der evaluierten Alternative, ebenfalls unkritisch.)*
+- **DB-User-Passwörter (`Cloud!Benutzer-Giovanni-2026` u. a.)** sind Demo-Credentials, die das Bewertungs-Schema verlangt (funktionierender DCL-Lauf). Diese werden unmittelbar nach der LB3-Demo rotiert bzw. der Cloud-Container zurückgebaut (`pct destroy 9003`).
+- **IP-Allowlist** — nur berechtigte Quell-IPs auf `:3306`, sonst DROP (kein `0.0.0.0/0`). Siehe `screenshots/cloud_rds_security_group.*` und `VERIFICATION.md` §3.
+- **TLS erzwungen** auf der eigenen Cloud (`require_secure_transport = ON`, TLSv1.3, eigene CA). Zusätzlich `REQUIRE SSL` auf jedem App-User; Klartext → `ERROR 3159`.
 - **`.gitignore`** schliesst Lockfiles, OS-Junk, Dumps und Secret-Dateien aus.
 
 ---

@@ -1,4 +1,5 @@
 # Step-by-Step Guide (No Git Version)
+n> **⚠ HISTORISCHES ARBEITSDOKUMENT (Aiven-Route).** Die PARTs 7–10 beschreiben die **evaluierte Aiven-Alternative** — Aiven wurde bewusst zugunsten der **eigenen Homelab-Cloud** verworfen (volle Kontrolle, kein Vendor-Lock, Max-Bonus). Produktiv/live: `docs/MS_C_Cloud_SelfHosted.md` + `VERIFICATION.md`. Upload-Ziel ist GitHub (nicht GitLab).
 
 *For: Giovanni Merola · M141 LB3 · Backpacker DB Migration*
 
