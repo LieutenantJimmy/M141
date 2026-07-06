@@ -28,8 +28,8 @@ Die SQL-Befehle der Tests sind in `sql/dql/60_tests_roles.sql` und `sql/dql/50_d
 | A-07b | `UPDATE tbl_buchung … WHERE …` | OK | ✅ |
 | A-07c | `DELETE FROM tbl_buchung WHERE Buchungs_ID=@bid` | OK | ✅ |
 | A-08 | `INSERT INTO tbl_leistung …` | ER 1142 | ✅ Error 1142 |
-| A-09 | `INSERT INTO tbl_positionen …` | OK | ✅ |
-| A-10 | `DELETE FROM tbl_positionen WHERE Positions_ID=…` | OK | ✅ |
+| A-09 | `INSERT INTO tbl_positionen …` *(Demo-only, manuell — nicht in 60_tests_roles.sql)* | OK | ✅ |
+| A-10 | `DELETE FROM tbl_positionen WHERE Positions_ID=…` *(Demo-only, manuell)* | OK | ✅ |
 
 ### 2.2 Rolle `role_management` (User: `giovanni_manager`)
 
@@ -41,18 +41,25 @@ Die SQL-Befehle der Tests sind in `sql/dql/60_tests_roles.sql` und `sql/dql/50_d
 | B-03 | `UPDATE tbl_benutzer SET Password=SHA2(…)` | OK | ✅ |
 | B-04 | `INSERT INTO tbl_buchung …` | ER 1142 | ✅ Error 1142 |
 | B-05 | `UPDATE tbl_positionen SET Preis=0` | ER 1142 | ✅ Error 1142 |
-| B-06 | `DELETE FROM tbl_buchung` | ER 1142 | ✅ Error 1142 |
-| B-07 | `INSERT INTO tbl_land (Land) VALUES ('Atlantis')` | OK | ✅ |
-| B-08 | `DELETE FROM tbl_land WHERE Land='Atlantis'` | OK | ✅ |
+| B-06 | `DELETE FROM tbl_buchung` *(Demo-only, manuell)* | ER 1142 | ✅ Error 1142 |
+| B-07 | `INSERT INTO tbl_land (Land) VALUES ('Atlantis')` *(Demo-only, manuell)* | OK | ✅ |
+| B-08 | `DELETE FROM tbl_land WHERE Land='Atlantis'` *(Demo-only, manuell)* | OK | ✅ |
 
 ### 2.3 User `giovanni_dba` (Admin)
 
 | TC | Aktion | Erwartet | Resultat |
 |---|---|---|---|
-| C-01 | `SHOW GRANTS` | enthält `ALL PRIVILEGES … WITH GRANT OPTION` | ✅ |
-| C-02 | `DROP TABLE tbl_test` *(erst angelegt)* | OK | ✅ |
+| C-01 | `SHOW GRANTS` *(Demo-only, manuell)* | enthält `ALL PRIVILEGES … WITH GRANT OPTION` | ✅ |
+| C-02 | `DROP TABLE tbl_test` *(erst angelegt; Demo-only, manuell)* | OK | ✅ |
 
 > Hinweis: Negative Cases sind in `60_tests_roles.sql` standardmässig **auskommentiert**, damit das Script in einer Session durchläuft. Beim Vorführen werden sie einzeln entkommentiert und einzeln ausgeführt (→ siehe Demo-Script).
+
+> **Zählweise (verbindlich): 23 Rollen-Testfälle** = die 23 Zeilen der Tabellen 2.1–2.3.
+> Davon sind **16 scriptbasiert** (entsprechen den 13 TC-Blöcken in `sql/dql/60_tests_roles.sql`;
+> A-07 und B-02 haben Teilschritte a/b/c) und **7 als „Demo-only, manuell" markiert**
+> (A-09, A-10, B-06, B-07, B-08, C-01, C-02 — ohne Script-Pendant, werden in der Demo
+> von Hand ausgeführt). Die Kurzsuite in `VERIFICATION.md` §2c (8 Proben) ist ein
+> unabhängiger Live-Audit-Auszug, kein eigener Zählstand.
 
 ---
 
@@ -100,7 +107,7 @@ Der Testdatensatz fügt in jede Tabelle genau **einen** Datensatz ein. Die Zeile
 - Schema in 2.NF mit InnoDB, FKs, Indizes und CHECK-Constraints.
 - CSV-Import mit Staging und Datenbereinigung erfolgreich.
 - Zugriffsmatrix vollständig umgesetzt (Rollen + Spaltenrechte für `Password` / `deaktiviert`).
-- Alle 13 Konsistenz-Prüfungen (T-D-01 … T-D-12, T-D-08 in a/b geteilt) und 19 Rollen-Testfälle bestanden bzw. nachvollziehbar dokumentiert.
+- Alle 13 Konsistenz-Prüfungen (T-D-01 … T-D-12, T-D-08 in a/b geteilt) und **23 Rollen-Testfälle** (16 scriptbasiert, 7 Demo-only/manuell) bestanden bzw. nachvollziehbar dokumentiert.
 
 → Lokale Datenbasis ist **migrationsbereit** für Cloud (MS C/D).
 

@@ -2,6 +2,8 @@
 
 **Autor:** Giovanni Merola &nbsp;·&nbsp; **Klasse:** M141 &nbsp;·&nbsp; **Schule:** TBZ &nbsp;·&nbsp; **Abgabe:** 30.06.2026
 
+> **Zeitachse (zur Einordnung der Datei-Daten):** Abgabe-Stand der Arbeit ist der 30.06.2026; die Cloud-Deploy- und Verifikations-Artefakte datieren **06.–07.07.2026**, weil der erste Ziel-Host (freya) am 02.07. ausfiel und die eigene Cloud host-agnostisch auf einem zweiten Homelab-Host (phoebe) neu deployt wurde. **Arbeitsform: Partnerarbeit mit Agustin** (Demo gemeinsam, siehe §7).
+
 > **Ziel.** Die Backpacker-Hostel-Datenbank von Access auf MariaDB migrieren — zuerst lokal (XAMPP/MariaDB), dann in die **eigene, selbst gehostete Cloud** (MariaDB-LXC auf dem Proxmox-Homelab, TLS erzwungen). Inklusive Normalisierung auf 2.NF, Datenbereinigung, Rollenkonzept mit Spaltenrechten, Tests, automatisierte Migration mit TLS und vollständige Dokumentation. *(Aiven wurde evaluiert, aber bewusst zugunsten der eigenen Homelab-Cloud verworfen — volle Kontrolle, kein Vendor-Lock, Max-Bonus.)*
 
 ---
@@ -39,7 +41,7 @@ Jede Zeile der LB3-Bewertungsmatrix ist mit konkreten Artefakten im Repo belegt:
 | **MS B 1.2 · Zugriffsmatrix** | 2 Rollen × 6 Tabellen, Spaltenrechte | `docs/MS_B_1_2_Zugriffsmatrix.md` · `sql/dcl/01_roles_users.sql` |
 | **MS B 1.3 · DCL lokal** | 2 Rollen + 3 User, `Password`-Spalte gesperrt | `sql/dcl/01_roles_users.sql` |
 | **MS B 1.4 · Datenimport & Cleanup** | Staging → DML → Zieltabelle | `sql/dml/10_import_csv.sql` · `sql/dml/20_cleanup_and_load.sql` · `sql/dml/30_drop_staging.sql` |
-| **MS B 1.5 · Tests lokal** | 13 Datentests + 19 Rollen-Tests (pos/neg), auf MariaDB reproduziert | `sql/dql/50_data_consistency.sql` · `sql/dql/60_tests_roles.sql` · `docs/MS_B_1_5_Testprotokolle.md` · `docs/Reproduktion_Lokal.md` · `screenshots/local_*.{png,txt}` |
+| **MS B 1.5 · Tests lokal** | 13 Datentests + 23 Rollen-Testfälle (16 scriptbasiert, 7 Demo-only; pos/neg), auf MariaDB reproduziert | `sql/dql/50_data_consistency.sql` · `sql/dql/60_tests_roles.sql` · `docs/MS_B_1_5_Testprotokolle.md` · `docs/Reproduktion_Lokal.md` · `screenshots/local_*.{png,txt}` |
 | **DB-Dump / Backup** | Struktur + Daten, `mysqldump --single-transaction` | `backpacker_lb3_giovanni_dump.sql(.gz)` |
 | **MS C 2.1 · Cloud Setup (+Bonus)** | **Eigene Cloud** (self-hosted MariaDB-LXC) → max. Bonus; **LIVE** deployt | `docs/MS_C_Cloud_SelfHosted.md` · `sql/repro/setup_cloud_selfhosted.sh` · `screenshots/cloud_rds_dashboard.*` |
 | **MS C 2.2 · Cloud-Betrieb** | 8-Punkte-Härtung, TLS erzwungen, IP-Allowlist | `docs/MS_C_Cloud_SelfHosted.md` §3–5 · `config/my_cloud_selfhosted.cnf` · `screenshots/cloud_rds_konfiguration.*` · `screenshots/cloud_rds_security_group.*` |

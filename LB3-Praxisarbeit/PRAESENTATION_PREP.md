@@ -42,7 +42,7 @@ CSV (Access-Export)
 
 ## f) Testresultate (alles grün ✅)
 
-- **Lokal:** 13 Konsistenz-Checks (FKs, Sentinels, Duplikate, Checks) + **19 Rollen-Tests** positiv/negativ → erwartete **ERROR 1142/1143** treffen exakt ein.
+- **Lokal:** 13 Konsistenz-Checks (FKs, Sentinels, Duplikate, Checks) + **23 Rollen-Testfälle** (16 scriptbasiert, 7 Demo-only) positiv/negativ → erwartete **ERROR 1142/1143** treffen exakt ein.
 - **Cloud:** Counts identisch, **5 FKs**, utf8mb4, Rollen greifen, **Klartext abgewiesen (3159)**, TLSv1.3-Session nachgewiesen.
 - **Besonderheit ehrlich erklärt:** 22 Positionen mit negativer Anzahl/Preis = **bewusst erlaubte Stornos** (dokumentiert, kein Fehler); Rabatt-CHECK-Verstösse = **0**.
 - Jeder Nachweis liegt doppelt vor: **Screenshot + rohe Konsolen-Ausgabe** (`screenshots/`).

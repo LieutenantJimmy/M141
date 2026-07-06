@@ -79,7 +79,7 @@ C-D-02 `fk_anzahl = 5` ✅ · C-D-03 `utf8mb4` ✅ · C-D-04 `have_ssl=YES`,
 `require_secure_transport=ON` ✅ · C-D-05/06 Rollen + Grants vorhanden ✅ ·
 C-D-07 `Giovanni-Test` = 1 ✅ · Reports R-01…R-03 liefern plausible Resultate ✅.
 
-**2c) Rollen-Tests (positiv/negativ, net-zero)** — 8/8 wie erwartet:
+**2c) Rollen-Tests (positiv/negativ, net-zero)** — Kurzsuite des Audits, 8/8 wie erwartet *(das vollständige Protokoll umfasst 23 Testfälle — siehe `MS_B_1_5_Testprotokolle.md` §2)*:
 
 ```text
 [P1 benutzer SELECT personen]            n = 2036                      OK
