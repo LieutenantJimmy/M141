@@ -2,6 +2,8 @@
 
 *Autor: Giovanni Merola · M141 · LB3 · 30.06.2026*
 
+> **⚠ Dieses Kapitel ist die ursprüngliche Provider-Variante (Aiven) und dient als Evaluations-/Vergleichsgrundlage.** Die **tatsächlich produktive, live deployte** Cloud-DB ist die **eigene Cloud** (selbstgehosteter MariaDB-LXC, TLS erzwungen) — siehe **[`MS_C_Cloud_SelfHosted.md`](./MS_C_Cloud_SelfHosted.md)** mit Live-Nachweisen `screenshots/cloud_*.png`. Der Weg AWS → Aiven → eigene Cloud dokumentiert die Evaluationstiefe.
+
 > **Hinweis Cloud-Provider-Pivot**:
 > Ursprünglich war AWS RDS MariaDB geplant (siehe `MS_A_Cloud_Evaluation.md`). Da die Klasse keinen TBZ-Schulungs-AWS-Account erhalten hat und ein privater Account die nötigen VPC-/IAM-Berechtigungen nicht ohne Aufwand freischaltet, wurde nach erneuter Evaluation auf **Aiven for MySQL** gewechselt. Aiven qualifiziert gemäss LB3-Rahmen ("Andere oder eigene Cloud-DB gibt +") für den Plus-Bonus in MS C 2.1.
 
