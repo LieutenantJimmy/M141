@@ -61,6 +61,8 @@ LB3-Praxisarbeit/
 ├── .gitignore                      ← OS/Office-Junk und Secrets ausgeschlossen
 ├── cleanup_before_upload.ps1       ← Helper zum Aufräumen vor GitLab-Upload
 ├── M141 LB3 Bewertung LE.xlsx      ← Selbsteinschätzungs-Matrix (Partnerarbeit, Note 5.77)
+├── LB3_Praesentation.pptx          ← Folien-Deck für die Demo (8 Folien, 16:9)
+├── build_pptx.py                   ← Reproduzierbarer Generator des Decks (python-pptx)
 ├── backpacker_lb3_giovanni_dump.sql(.gz) ← DB-Dump (Backup, Struktur+Daten) — Abgabe-Deliverable
 ├── backpacker_ddl_lb3.sql          ← Original-DDL der Quell-DB
 ├── backpacker_lb3.png              ← Original-ERD der Quell-DB
