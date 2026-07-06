@@ -100,7 +100,10 @@ LB3-Praxisarbeit/
 │   │   ├── 60_tests_roles.sql      ← Rollen-Tests positiv/negativ
 │   │   └── 70_tests_cloud.sql      ← Cloud-Tests (Counts, FK, TLS, Rollen)
 │   ├── repro/
-│   │   └── run_lb3_local.sh        ← One-Shot-Reproduktion der lokalen DB (MariaDB)
+│   │   ├── run_lb3_local.sh        ← One-Shot-Reproduktion der lokalen DB (MariaDB)
+│   │   ├── setup_cloud_selfhosted.sh ← Setup eigene Cloud (MariaDB+TLS+Härtung, idempotent)
+│   │   ├── recover_and_deploy_freya.sh ← freya-Recovery-Orchestrator (Firewall-Stop zuerst)
+│   │   └── preflight_demo.sh       ← Demo-Preflight: 21 Checks + Auto-Heal + GO/NO-GO
 │   └── migration/
 │       ├── do_migration.ps1            ← One-Shot-Wrapper (PowerShell)
 │       ├── migrate_local_to_cloud.ps1  ← Detaillierte PS-Migration

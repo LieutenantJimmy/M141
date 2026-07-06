@@ -14,7 +14,7 @@
 
 | Aspekt | Wert |
 |---|---|
-| Plattform | Proxmox VE 9.x Homelab-Host **phoebe** (192.168.1.30) — freya-Fallback in §6 |
+| Plattform | Proxmox VE 9.x Homelab-Host **phoebe** (192.168.1.30) — freya-Fallback in §8 |
 | DB-Instanz | Unprivilegierter LXC **`cloud-db-giovanni`** (CT 9003) |
 | Endpoint | `192.168.1.62:3306` (VLAN 1) |
 | DBMS | MariaDB 11.8.6 |
@@ -38,12 +38,12 @@ Das Skript ist idempotent und führt aus:
 CT-Erzeugung (bereits ausgeführt):
 
 ```bash
-pct create 9002 local:vztmpl/debian-13-standard_13.1-2_amd64.tar.zst \
+pct create 9003 ssd-local:vztmpl/debian-13-standard_13.1-2_amd64.tar.zst \
   --hostname cloud-db-giovanni --memory 2048 --swap 512 --cores 2 \
-  --rootfs local-lvm:8 \
+  --rootfs ssd-pool:8 \
   --net0 name=eth0,bridge=vmbr0,tag=1,ip=192.168.1.62/24,gw=192.168.1.1,firewall=1 \
   --unprivileged 1 --features nesting=1,keyctl=1 --tags test
-pct start 9002
+pct start 9003
 ```
 
 ## 3. Betrieb & Härtung (MS C 2.2) — 8-Punkte-Checkliste
@@ -52,8 +52,8 @@ pct start 9002
 |---|---|---|:--:|
 | 1 | Verschlüsselung erzwungen | `require_secure_transport=ON` + `REQUIRE SSL` je User | ✅ konfiguriert |
 | 2 | Eigenes CA-signiertes Server-Zertifikat | OpenSSL, SAN auf Endpoint-IP | ✅ im Setup-Skript |
-| 3 | IP-Allowlist (kein `0.0.0.0/0`) | Proxmox-FW `9002.fw`: nur `192.168.1.40/32` (Workstation) + `192.168.1.32/32` (Migrationsquelle) auf `:3306` | ✅ angewendet |
-| 4 | Default-Deny am Container | `9002.fw` `policy_in: DROP` | ✅ angewendet |
+| 3 | IP-Allowlist (kein `0.0.0.0/0`) | Proxmox-FW `9003.fw`: nur Workstation, phoebe-Host und VPN auf `:3306` | ✅ angewendet |
+| 4 | Default-Deny am Container | `9003.fw` `policy_in: DROP` | ✅ angewendet |
 | 5 | Kein `LOAD DATA LOCAL` serverseitig | `local-infile=0` | ✅ in `my.cnf` |
 | 6 | Keine DNS-Reverse-Lookups | `skip-name-resolve=1` | ✅ in `my.cnf` |
 | 7 | Beobachtbarkeit | `slow_query_log`, `log_error`, `long_query_time=2` | ✅ in `my.cnf` |
@@ -97,7 +97,46 @@ Screenshot **und** rohe `.txt` im Repo abgelegt:
 | Cloud-Tests `70_tests_cloud.sql` (Counts, FK=5, utf8mb4, Rollen) | ✅ 2036/11/82/8/1006/1746 | `screenshots/cloud_tests_data.*` |
 | Demo: 3 User per TLS, Rollen erzwungen (1142/1143) | ✅ | `screenshots/cloud_demo_3_users.*` |
 
-## 6. Vergleich zur ursprünglichen Aiven-Evaluation
+## 6. Demo-Betrieb: Preflight-Check & Golden Snapshot
+
+### 6.1 Preflight (~2 Min vor der Präsentation)
+
+Ein Befehl auf dem Proxmox-Host prüft die komplette Demo-Kette und heilt
+gefahrlos Heilbares automatisch (CT starten, MariaDB starten, CA neu ziehen):
+
+```bash
+/root/preflight_demo.sh        # Repo-Kopie: sql/repro/preflight_demo.sh
+```
+
+Geprüft werden 21 Punkte: CT-Status, MariaDB-Dienst, CA-/Server-Zertifikat-Gültigkeit
+(>24 h), TCP-Endpoint, TLS-Session (TLSv1.3 + CA-Verifikation), `require_secure_transport`,
+Klartext-Abweisung (ERROR 3159), Login aller 3 Demo-User inkl. Default-Rolle, exakte
+Zeilenzahlen (2036/11/82/8/1006/1746), 5 FKs, DML positiv (net-zero INSERT+UPDATE+DELETE),
+DCL negativ (1142/1143), DDL als DBA (net-zero CREATE+DROP) und der Migrations-Testdatensatz.
+Am Ende steht ein grosses **GO / NO-GO**. Alle Schreibtests sind net-zero — der
+Preflight verändert den Datenbestand nicht. *(Verifiziert: 21/21 GO; Auto-Heal
+mit absichtlich gestopptem MariaDB getestet → `[HEAL] … gestartet + ping OK`.)*
+
+### 6.2 Golden Snapshot (Sofort-Wiederherstellung bei Demo-Pannen)
+
+Vom verifizierten Demo-Zustand existiert ein Proxmox-Snapshot **nur von CT 9003**:
+
+```bash
+pct snapshot 9003 golden-db-ready   # angelegt 07.07.2026, Preflight 21/21 GO
+```
+
+| Aktion | Befehl (auf dem Proxmox-Host) |
+|---|---|
+| Snapshot ansehen | `pct listsnapshot 9003` |
+| **Sofort-Restore** (z. B. nach kaputter Probe) | `pct rollback 9003 golden-db-ready && pct start 9003` |
+| Danach validieren | `/root/preflight_demo.sh` → muss GO zeigen |
+| Snapshot löschen (nach der Abgabe) | `pct delsnapshot 9003 golden-db-ready` |
+| Kompletter Rückbau der Cloud-DB | `pct stop 9003 && pct destroy 9003` |
+
+> Rollback verwirft **alles** seit dem Snapshot (inkl. gewollter Änderungen) —
+> für die Demo ist genau das gewünscht: in <1 Minute zurück zum grünen Zustand.
+
+## 7. Vergleich zur ursprünglichen Aiven-Evaluation
 
 Die ursprüngliche Provider-Evaluation (Aiven for MySQL, siehe
 `MS_A_Cloud_Evaluation.md`) bleibt als Entscheidungsgrundlage gültig. Die eigene
@@ -106,7 +145,7 @@ kein Vendor-Lock-in, Bonus für „eigene Cloud-DB"). Trade-off: Betrieb, Backup
 Verfügbarkeit liegen in eigener Verantwortung — was der freya-Ausfall zeigt (die
 Cloud wurde deshalb auf `phoebe` deployt).
 
-## 7. Recovery-Pfad für freya (Referenz — Cloud läuft aktuell auf phoebe)
+## 8. Recovery-Pfad für freya (Referenz — Cloud läuft aktuell auf phoebe)
 
 > Die produktive Cloud-DB läuft bereits auf **phoebe** (§ oben). Dieser Abschnitt
 > bleibt als dokumentierter Wiederherstellungs-/Umzugspfad für **freya**, sobald
@@ -123,7 +162,7 @@ Cloud wurde deshalb auf `phoebe` deployt).
 > **Deshalb MUSS die Recovery an der Konsole mit dem Firewall-Stop beginnen,
 > BEVOR irgendetwas anderes passiert** — sonst droht erneuter Aussperr-Effekt.
 
-### 6.1 Voraussetzung: freya physisch neu starten
+### 8.1 Voraussetzung: freya physisch neu starten
 
 freya reagiert nicht auf ARP/Ping/8006 — der Host ist auf L2 verschwunden. Er
 erholt sich **nicht von selbst** und muss von Giovanni per **BMC/IPMI oder
@@ -131,7 +170,7 @@ physischem Power-Cycle** neu gestartet werden. Der BMC lehnt unsere gespeicherte
 Zugangsdaten ab, daher ist kein Remote-Reset durch das Automations-Tooling
 möglich. Ohne diesen Neustart ist keiner der folgenden Schritte durchführbar.
 
-### 6.2 Recovery-Reihenfolge (Firewall-Stop ZUERST)
+### 8.2 Recovery-Reihenfolge (Firewall-Stop ZUERST)
 
 Es gibt zwei Wege — der Orchestrator macht Schritt 0–3 automatisch:
 
@@ -159,7 +198,7 @@ führt dann das Setup im Container aus:
 5. CA-Cert aus dem CT holen (für die Migration): `pct pull 9002 /etc/mysql/certs/ca.pem ./cloud-ca-giovanni.pem`.
 6. Migration: `export CLOUD_ADMIN_PWD=…; sql/migration/migrate_local_to_selfhosted.sh` (Struktur + Daten + DCL, alles per TLS).
 
-### 6.3 Verifikation & Screenshots (Urheberbeweis)
+### 8.3 Verifikation & Screenshots (Urheberbeweis)
 
 Nach dem Deploy die Cloud-Nachweise `cloud_*.png` mit sichtbarem `giovanni`
 erstellen (Liste in `screenshots/README.md`). Mindestnachweise:
@@ -178,7 +217,7 @@ mysql -h 192.168.1.62 -u giovanni_dba -p --ssl-ca=cloud-ca-giovanni.pem \
       backpacker_lb3_giovanni < sql/dql/70_tests_cloud.sql
 ```
 
-### 6.4 Rollback / Aufräumen
+### 8.4 Rollback / Aufräumen
 
 - Setup ist idempotent — erneutes Ausführen ist gefahrlos.
 - Rückbau der Test-Umgebung: `pct stop 9002 && pct destroy 9002` (entfernt die
@@ -186,4 +225,4 @@ mysql -h 192.168.1.62 -u giovanni_dba -p --ssl-ca=cloud-ca-giovanni.pem \
 
 ---
 
-*Sign-off: Giovanni Merola. Setup-Bauplan 02.07.2026; **eigene Cloud LIVE deployt 06.07.2026** auf `phoebe` (Endpoint 192.168.1.62:3306, TLS erzwungen). freya-Recovery-Pfad (§7) bleibt als Referenz dokumentiert.*
+*Sign-off: Giovanni Merola. Setup-Bauplan 02.07.2026; **eigene Cloud LIVE deployt 06.07.2026** auf `phoebe` (Endpoint 192.168.1.62:3306, TLS erzwungen). freya-Recovery-Pfad (§8) bleibt als Referenz dokumentiert.*
