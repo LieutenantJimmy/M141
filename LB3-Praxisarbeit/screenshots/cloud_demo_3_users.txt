@@ -1,0 +1,40 @@
+# M141 LB3 DEMO - 3 Cloud-User verbinden per TLS auf die eigene Cloud (192.168.1.62)
+# Jeder User traegt seine Rolle + wird durch die Zugriffsmatrix begrenzt.
+
+===== [1] giovanni_benutzer (role_benutzer, Empfang) =====
+user	rolle
+giovanni_benutzer@%	role_benutzer
+darf_personen_lesen
+2036
+  -- Negativ: DELETE tbl_personen (erwartet 1142):
+--------------
+DELETE FROM tbl_personen WHERE Personen_ID=1
+--------------
+
+ERROR 1142 (42000) at line 1: DELETE command denied to user 'giovanni_benutzer'@'192.168.1.30' for table `backpacker_lb3_giovanni`.`tbl_personen`
+  -- Negativ: SELECT Password (erwartet 1143):
+--------------
+SELECT Password FROM tbl_benutzer LIMIT 1
+--------------
+
+ERROR 1143 (42000) at line 1: SELECT command denied to user 'giovanni_benutzer'@'192.168.1.30' for column 'Password' in table 'tbl_benutzer'
+
+===== [2] giovanni_manager (role_management) =====
+user	rolle
+giovanni_manager@%	role_management
+darf_leistung_lesen
+8
+  -- Negativ: INSERT tbl_buchung (erwartet 1142, nur SELECT):
+--------------
+INSERT INTO tbl_buchung (Personen_FS,Ankunft,Abreise,Land_FS) VALUES (1,NOW(),NOW(),1)
+--------------
+
+ERROR 1142 (42000) at line 1: INSERT command denied to user 'giovanni_manager'@'192.168.1.30' for table `backpacker_lb3_giovanni`.`tbl_buchung`
+
+===== [3] giovanni_dba (ALL PRIVILEGES) =====
+user
+giovanni_dba@%
+tabellen
+6
+
+# Alle drei per TLS (require_secure_transport=ON) - Klartext wuerde mit ERROR 3159 abgewiesen.

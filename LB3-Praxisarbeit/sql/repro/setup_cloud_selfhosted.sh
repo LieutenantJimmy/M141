@@ -129,7 +129,10 @@ log_error                 = ${LOGDIR}/error.log
 innodb_buffer_pool_size        = 512M
 innodb_flush_log_at_trx_commit = 1
 CNF
-info "geschrieben: $CONF"
+# my.cnf muss fuer den mysql-User lesbar sein (enthaelt keine Geheimnisse) -
+# sonst ignoriert MariaDB die Datei und require_secure_transport bleibt AUS.
+chmod 644 "$CONF"
+info "geschrieben: $CONF (Mode 644)"
 
 # ---- MariaDB starten + Bereitschaft abwarten -----------------------------
 log "[4/6] MariaDB starten und Bereitschaft pruefen"

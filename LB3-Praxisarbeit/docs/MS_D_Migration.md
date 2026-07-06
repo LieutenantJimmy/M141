@@ -1,6 +1,16 @@
 # MS D – Automatisierte Migration (Lokal → Cloud) + Testprotokolle
 
-*Autor: Giovanni Merola · M141 · LB3 · 30.06.2026*
+*Autor: Giovanni Merola · M141 · LB3 · Live-Migration 06.07.2026*
+
+> **✅ LIVE gegen die eigene Cloud ausgeführt.** Die hier dokumentierte Migration
+> wurde real gegen die selbstgehostete Cloud-DB `cloud-db-giovanni`
+> (`192.168.1.62:3306`, TLS erzwungen) durchgeführt — siehe
+> `docs/MS_C_Cloud_SelfHosted.md` und die Nachweise `screenshots/cloud_*.png`
+> (+ rohe `.txt`). Für die eigene Cloud gelten die self-hosted-Artefakte:
+> DCL `sql/dcl/04_selfhosted_cloud_users.sql`, Migrations-Wrapper
+> `sql/migration/migrate_local_to_selfhosted.sh`, CA `sql/migration/cloud-ca-giovanni.pem`.
+> Die unten genannten Aiven-Pfade/-Zeiten stammen aus der ursprünglichen
+> Provider-Planung; die **Testergebnisse** sind gegen die eigene Cloud verifiziert.
 
 ## 3.1 Berechtigungen automatisiert übertragen
 

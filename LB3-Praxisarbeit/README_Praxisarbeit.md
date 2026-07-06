@@ -23,7 +23,7 @@ Für den Einstieg empfehle ich diese Reihenfolge:
 
 > **Wichtiger Hinweis Cloud-Provider:** Ursprünglich war **AWS RDS for MariaDB** geplant. Da kein TBZ-Schulungs-AWS-Account zur Verfügung stand, wurde nach erneuter Evaluation auf **Aiven for MySQL** gewechselt. Aiven qualifiziert gemäss LB3-Rahmen ("Andere oder eigene Cloud-DB gibt +") für den Plus-Bonus. Details in `docs/MS_A_Cloud_Evaluation.md`.
 >
-> **Update 02.07.2026 – eigene Cloud (max. Bonus):** Die produktive DB wird zusätzlich als **selbstgehostete eigene Cloud** auf dem Proxmox-Host „freya" umgesetzt (LXC `cloud-db-giovanni`, MariaDB 11.8, TLS erzwungen, IP-Allowlist). Bauplan, Härtung, Firewall, DCL, Migrations- und Recovery-Skript sind vollständig und `shellcheck`-geprüft: `docs/MS_C_Cloud_SelfHosted.md`, `config/my_cloud_selfhosted.cnf`, `sql/repro/setup_cloud_selfhosted.sh`, `sql/repro/recover_and_deploy_freya.sh` (Host-Orchestrator, `pve-firewall stop` fest an erster Stelle), `sql/dcl/04_selfhosted_cloud_users.sql`, `sql/migration/migrate_local_to_selfhosted.sh`. **Das Live-Deployment ist derzeit blockiert**, weil freya während des Setups vom Netz fiel (Host offline, siehe Statushinweis im Kapitel); der Container ist angelegt, das MariaDB-Setup läuft nach freya-Recovery.
+> **Update 06.07.2026 – eigene Cloud LIVE (max. Bonus):** Die produktive DB läuft als **selbstgehostete eigene Cloud** auf dem Proxmox-Homelab (LXC `cloud-db-giovanni`, Endpoint **`192.168.1.62:3306`**, MariaDB 11.8.6, **TLS erzwungen/TLSv1.3**, IP-Allowlist). Struktur+Daten sind per TLS migriert (2036/11/82/8/1006/1746 — identisch lokal↔cloud), die 3 Rollen-User haben `REQUIRE SSL`, Klartext wird mit `ERROR 3159` abgewiesen. Nachweise: `screenshots/cloud_*.png` (+ `.txt`). Tooling (`shellcheck`-geprüft): `docs/MS_C_Cloud_SelfHosted.md`, `config/my_cloud_selfhosted.cnf`, `sql/repro/setup_cloud_selfhosted.sh`, `sql/repro/recover_and_deploy_freya.sh`, `sql/dcl/04_selfhosted_cloud_users.sql`, `sql/migration/migrate_local_to_selfhosted.sh`. *(Ursprünglicher Ziel-Host freya fiel am 02.07. aus → host-agnostisch auf `phoebe` deployt; freya-Recovery-Pfad dokumentiert.)*
 
 ---
 
@@ -41,13 +41,13 @@ Jede Zeile der LB3-Bewertungsmatrix ist mit konkreten Artefakten im Repo belegt:
 | **MS B 1.4 · Datenimport & Cleanup** | Staging → DML → Zieltabelle | `sql/dml/10_import_csv.sql` · `sql/dml/20_cleanup_and_load.sql` · `sql/dml/30_drop_staging.sql` |
 | **MS B 1.5 · Tests lokal** | 13 Datentests + 19 Rollen-Tests (pos/neg), auf MariaDB reproduziert | `sql/dql/50_data_consistency.sql` · `sql/dql/60_tests_roles.sql` · `docs/MS_B_1_5_Testprotokolle.md` · `docs/Reproduktion_Lokal.md` · `screenshots/local_*.{png,txt}` |
 | **DB-Dump / Backup** | Struktur + Daten, `mysqldump --single-transaction` | `backpacker_lb3_giovanni_dump.sql(.gz)` |
-| **MS C 2.1 · Cloud Setup (+Bonus)** | Aiven statt AWS → andere Cloud (Plus) | `docs/MS_C_Cloud_Setup.md` · `screenshots/cloud_rds_*` |
-| **MS C 2.2 · Cloud-Betrieb** | 10-Punkte-Härtungs-Checkliste | `docs/MS_C_Cloud_Setup.md` § 2.2 · `config/my_aiven.cnf` |
-| **MS D 3.1 · DCL automatisiert in Cloud** | DCL-Apply-Step im Migrations-Wrapper | `sql/dcl/03_cloud_users.sql` · `sql/migration/do_migration.ps1` |
-| **MS D 3.2 · DDL/DML automatisiert** | mysqldump + restore via TLS | `sql/migration/do_migration.ps1` · `sql/migration/migrate_local_to_cloud.{ps1,sh}` |
-| **MS D 3.3 · Cloud-Tests** | Row-Counts, FK-Check, Rollen, Reports | `sql/dql/70_tests_cloud.sql` · `screenshots/cloud_tests_data.png` |
-| **MS D 3.4 · Migrations-Test mit Datensatz** | Persönlicher Test-Datensatz `Giovanni-Test` | `sql/dml/40_testdaten_migration.sql` |
-| **Demo (3 User auf Cloud)** | Drei TLS-Logins, je eigene Rolle | `screenshots/cloud_demo_3_users.png` · `docs/Demo_Skript.md` |
+| **MS C 2.1 · Cloud Setup (+Bonus)** | **Eigene Cloud** (self-hosted MariaDB-LXC) → max. Bonus; **LIVE** deployt | `docs/MS_C_Cloud_SelfHosted.md` · `sql/repro/setup_cloud_selfhosted.sh` · `screenshots/cloud_rds_dashboard.*` |
+| **MS C 2.2 · Cloud-Betrieb** | 8-Punkte-Härtung, TLS erzwungen, IP-Allowlist | `docs/MS_C_Cloud_SelfHosted.md` §3–5 · `config/my_cloud_selfhosted.cnf` · `screenshots/cloud_rds_konfiguration.*` · `screenshots/cloud_rds_security_group.*` |
+| **MS D 3.1 · DCL automatisiert in Cloud** | DCL-Apply per TLS (Rollen + `REQUIRE SSL`) | `sql/dcl/04_selfhosted_cloud_users.sql` · `sql/migration/migrate_local_to_selfhosted.sh` |
+| **MS D 3.2 · DDL/DML automatisiert** | mysqldump + restore via TLS (verifiziert) | `sql/migration/migrate_local_to_selfhosted.sh` · `screenshots/cloud_migration_run.*` |
+| **MS D 3.3 · Cloud-Tests** | Counts 2036/…/1746, FK=5, utf8mb4, Rollen, TLS-Negativtest | `sql/dql/70_tests_cloud.sql` · `screenshots/cloud_tests_data.*` · `screenshots/cloud_tls_required.*` |
+| **MS D 3.4 · Migrations-Test mit Datensatz** | Persönlicher Test-Datensatz `Giovanni-Test` (in Cloud verifiziert) | `sql/dml/40_testdaten_migration.sql` |
+| **Demo (3 User auf Cloud)** | Drei TLS-Logins, je eigene Rolle, 1142/1143 | `screenshots/cloud_demo_3_users.*` · `docs/Demo_Skript.md` |
 | **Dokumentation / Urheberbeweis** | KI-Prompts protokolliert, Personalisierung überall | `prompts/ki_prompts.md`, alle SQL-Header |
 
 ---
@@ -76,7 +76,7 @@ LB3-Praxisarbeit/
 │   ├── MS_D_Migration.md
 │   ├── Demo_Skript.md
 │   ├── Fazit.md
-│   ├── MS_C_Cloud_SelfHosted.md    ← Eigene Cloud auf Proxmox (Bonus): Setup+Härtung, Live-Deploy blockiert
+│   ├── MS_C_Cloud_SelfHosted.md    ← Eigene Cloud auf Proxmox (Bonus): Setup+Härtung, LIVE deployt
 │   ├── Protokollierung.md
 │   ├── Reproduktion_Lokal.md       ← Nachweis: DB aus Skripten reproduzierbar (MariaDB-Lauf)
 │   └── STEP_BY_STEP_GUIDE.md
@@ -122,22 +122,21 @@ LB3-Praxisarbeit/
 ├── prompts/
 │   └── ki_prompts.md               ← Vollständige KI-Prompt-Historie
 │
-├── screenshots/                    ← Nachweise (10 PNGs + 2 Text-Outputs)
-│   ├── local_phpmyadmin_db_uebersicht.png
-│   ├── local_phpmyadmin_fk_constraints.png
-│   ├── local_users_grants.png
-│   ├── local_tests_data.png
-│   ├── local_tests_roles_positiv.png
-│   ├── local_tests_roles_negativ.png
-│   ├── cloud_rds_dashboard.png     ← Aiven Service-Übersicht
-│   ├── cloud_rds_konfiguration.png ← Connection-Info
-│   ├── cloud_rds_security_group.png← IP-Allowlist (eigene IP/32)
-│   ├── cloud_rds_parameter_group.png (optional, Advanced Configuration)
-│   ├── cloud_migration_run.png     ← Output do_migration.ps1
-│   ├── cloud_verbindung_giovanni.png← TLS-Login OK
-│   ├── cloud_tls_required.png      ← Negativ-Test (TLS DISABLED)
-│   ├── cloud_tests_data.png        ← 70_tests_cloud.sql
-│   └── cloud_demo_3_users.png      ← 3 Rollen-User parallel
+├── screenshots/                    ← Nachweise (je PNG + rohe .txt)
+│   ├── local_phpmyadmin_db_uebersicht.png/.txt
+│   ├── local_phpmyadmin_fk_constraints.png/.txt
+│   ├── local_users_grants.png/.txt
+│   ├── local_tests_data.png/.txt
+│   ├── local_tests_roles_positiv.png/.txt
+│   ├── local_tests_roles_negativ.png/.txt
+│   ├── cloud_rds_dashboard.png/.txt      ← Cloud-DBMS-Übersicht (Proxmox/MariaDB)
+│   ├── cloud_rds_konfiguration.png/.txt  ← Connection-Info + gehärtete my.cnf
+│   ├── cloud_rds_security_group.png/.txt ← Firewall-Allowlist (kein 0.0.0.0/0)
+│   ├── cloud_migration_run.png/.txt      ← Migration per TLS (Restore+DCL)
+│   ├── cloud_verbindung_giovanni.png/.txt← TLS-Login OK (TLSv1.3)
+│   ├── cloud_tls_required.png/.txt       ← Negativ-Test (ERROR 3159 ohne TLS)
+│   ├── cloud_tests_data.png/.txt         ← 70_tests_cloud.sql
+│   └── cloud_demo_3_users.png/.txt       ← 3 Rollen-User per TLS (1142/1143)
 │
 └── x_res/
     └── LB3-Rahmen.png              ← Original-Rahmenbild der Aufgabenstellung

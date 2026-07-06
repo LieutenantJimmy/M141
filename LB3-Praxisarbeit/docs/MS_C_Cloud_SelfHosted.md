@@ -1,10 +1,12 @@
 # MS C – Remote Cloud-DBMS: Eigene Cloud auf Proxmox (Bonus-Variante)
 
-*Autor: Giovanni Merola · M141 · LB3 · 02.07.2026*
+*Autor: Giovanni Merola · M141 · LB3 · Deployment 06.07.2026*
 
-> **Warum eigene Cloud?** Der LB3-Rahmen vergibt einen Plus-Bonus für „Andere oder eigene Cloud-DB". Statt eines Managed-Anbieters betreibe ich die produktive Datenbank auf **meiner eigenen Homelab-Cloud** (Proxmox-Cluster „freya"). Damit demonstriere ich Setup, Härtung und TLS-Absicherung selbst — genau die Kompetenzen, die ein Managed-Dienst sonst versteckt.
+> **Warum eigene Cloud?** Der LB3-Rahmen vergibt einen Plus-Bonus für „Andere oder eigene Cloud-DB". Statt eines Managed-Anbieters betreibe ich die produktive Datenbank auf **meiner eigenen Homelab-Cloud** (Proxmox VE). Damit demonstriere ich Setup, Härtung und TLS-Absicherung selbst — genau die Kompetenzen, die ein Managed-Dienst sonst versteckt.
 
-> **⚠ Status Live-Deployment (02.07.2026): BLOCKIERT.** Der Ziel-Host **freya** ist während des Setups vom Netz gefallen (100 % Paketverlust, keine ARP-Antwort — unabhängig auch vom Monitoring M254 gemeldet). Der Container `cloud-db-giovanni` (CT 9002) wurde **angelegt und gestartet** und seine Firewall-Allowlist gesetzt; das MariaDB-/TLS-Setup (`sql/repro/setup_cloud_selfhosted.sh`) lief jedoch noch **nicht** durch. Alle Skripte, Konfigurationen und die Härtungs-Checkliste unten sind fertig und getestet-vorbereitet; sie werden ausgeführt, sobald freya wieder erreichbar ist (siehe „Recovery" am Ende). Bis dahin ist dieses Kapitel ein **vollständiger, reproduzierbarer Bauplan** — keine Live-Nachweise.
+> **✅ Status Live-Deployment (06.07.2026): PRODUKTIV.** Die eigene Cloud-DB läuft: LXC `cloud-db-giovanni` am Endpoint **`192.168.1.62:3306`** (TLS erzwungen, TLSv1.3). Struktur + Daten wurden per TLS migriert (2036/11/82/8/1006/1746 — identisch zur lokalen DB), die drei Rollen-User sind mit `REQUIRE SSL` angelegt, und Klartext-Verbindungen werden mit `ERROR 3159` abgewiesen. Alle Nachweise liegen als `screenshots/cloud_*.png` (+ rohe `.txt`) im Repo.
+>
+> **Deployment-Host-Hinweis:** Ursprünglich war der Host **freya** vorgesehen; freya fiel jedoch am 02.07. aus (Hardware/Netz, wartet auf Power-Cycle). Da die Architektur host-agnostisch ist (unprivilegierter LXC + Standard-Proxmox), wurde die Cloud-DB auf dem **produktiven Homelab-Host `phoebe`** (192.168.1.30) instanziiert — identisches Setup-Skript, identische Härtung. Der `freya`-Recovery-Pfad in §6 bleibt als Referenz bestehen.
 
 ---
 
@@ -12,13 +14,13 @@
 
 | Aspekt | Wert |
 |---|---|
-| Plattform | Proxmox VE 9.2 Host **freya** (192.168.1.32) |
-| DB-Instanz | Unprivilegierter LXC **`cloud-db-giovanni`** (CT 9002) |
+| Plattform | Proxmox VE 9.x Homelab-Host **phoebe** (192.168.1.30) — freya-Fallback in §6 |
+| DB-Instanz | Unprivilegierter LXC **`cloud-db-giovanni`** (CT 9003) |
 | Endpoint | `192.168.1.62:3306` (VLAN 1) |
-| DBMS | MariaDB 11.8 |
-| Ressourcen | 2 vCPU, 2 GB RAM, 8 GB rootfs (`local-lvm`) |
-| Isolation | `unprivileged=1`, `nesting=1`, eigene Proxmox-Firewall |
-| Transport | **TLS erzwungen** (`require_secure_transport=ON`) + `REQUIRE SSL` pro User |
+| DBMS | MariaDB 11.8.6 |
+| Ressourcen | 2 vCPU, 2 GB RAM, 8 GB rootfs (`ssd-pool`) |
+| Isolation | `unprivileged=1`, `nesting=1`, eigene Proxmox-Firewall (Datacenter-FW aktiv) |
+| Transport | **TLS erzwungen** (`require_secure_transport=ON`, TLSv1.3) + `REQUIRE SSL` pro User |
 
 Das entspricht funktional einem Managed-Cloud-DBMS: dedizierter Endpoint,
 erzwungene Verschlüsselung, IP-Allowlist, getrennte Admin-/App-User.
@@ -59,7 +61,7 @@ pct start 9002
 
 Volle Konfiguration: [`config/my_cloud_selfhosted.cnf`](../config/my_cloud_selfhosted.cnf).
 
-## 4. Firewall-Regeln (angewendet auf CT 9002)
+## 4. Firewall-Regeln (angewendet auf CT 9003, `screenshots/cloud_rds_security_group.png`)
 
 ```
 [OPTIONS]
@@ -69,24 +71,46 @@ policy_out: ACCEPT
 
 [RULES]
 IN ACCEPT -source 192.168.1.40/32 -p tcp -dport 3306   # Workstation Giovanni
-IN ACCEPT -source 192.168.1.32/32 -p tcp -dport 3306   # Migrationsquelle (freya)
+IN ACCEPT -source 192.168.1.30/32 -p tcp -dport 3306   # phoebe Host (Migration + Demo-Client)
+IN ACCEPT -source 192.168.1.2/32  -p tcp -dport 3306   # vpn-01 (Demo via VPN von TBZ)
+IN ACCEPT -source 10.10.0.0/24    -p tcp -dport 3306   # VPN-Client-Pool
 IN ACCEPT -source 192.168.1.0/24  -p icmp              # Ping-Diagnose LAN
 ```
 
-Damit ist der DB-Port **nicht** offen fürs ganze LAN, sondern nur für die zwei
-benötigten Quell-IPs — das Pendant zur „Allowed inbound IP addresses"-Liste
+Damit ist der DB-Port **nicht** offen fürs ganze LAN (`0.0.0.0/0`), sondern nur
+für die benötigten Quell-IPs — das Pendant zur „Allowed inbound IP addresses"-Liste
 eines Managed-Anbieters.
 
-## 5. Vergleich zur ursprünglichen Aiven-Evaluation
+## 5. Live-Verifikation (06.07.2026) — Nachweise
+
+Alle Schritte gegen den Live-Endpoint `192.168.1.62:3306` ausgeführt und als
+Screenshot **und** rohe `.txt` im Repo abgelegt:
+
+| Nachweis | Ergebnis | Datei |
+|---|---|---|
+| Cloud-DBMS-Übersicht (CT läuft, MariaDB 11.8.6) | ✅ | `screenshots/cloud_rds_dashboard.*` |
+| Verbindungs-Info + gehärtete `my.cnf` | ✅ | `screenshots/cloud_rds_konfiguration.*` |
+| Firewall-Allowlist (kein `0.0.0.0/0`) | ✅ | `screenshots/cloud_rds_security_group.*` |
+| Automatisierte Migration per TLS (Struktur+Daten+DCL) | ✅ Restore OK, Cipher `TLS_AES_256_GCM_SHA384` | `screenshots/cloud_migration_run.*` |
+| TLS-Login OK (positiv) | ✅ `giovanni_dba@%`, TLSv1.3 | `screenshots/cloud_verbindung_giovanni.*` |
+| Klartext abgewiesen (negativ) | ✅ `ERROR 3159 … insecure transport prohibited` | `screenshots/cloud_tls_required.*` |
+| Cloud-Tests `70_tests_cloud.sql` (Counts, FK=5, utf8mb4, Rollen) | ✅ 2036/11/82/8/1006/1746 | `screenshots/cloud_tests_data.*` |
+| Demo: 3 User per TLS, Rollen erzwungen (1142/1143) | ✅ | `screenshots/cloud_demo_3_users.*` |
+
+## 6. Vergleich zur ursprünglichen Aiven-Evaluation
 
 Die ursprüngliche Provider-Evaluation (Aiven for MySQL, siehe
 `MS_A_Cloud_Evaluation.md`) bleibt als Entscheidungsgrundlage gültig. Die eigene
 Cloud gewinnt hier aus didaktischen Gründen (volle Kontrolle über Härtung/TLS,
-kein Vendor-Lock-in, Bonus für „eigene Cloud-DB"). Trade-off: Betrieb,
-Backup und Verfügbarkeit liegen in eigener Verantwortung — was die aktuelle
-freya-Störung eindrücklich zeigt.
+kein Vendor-Lock-in, Bonus für „eigene Cloud-DB"). Trade-off: Betrieb, Backup und
+Verfügbarkeit liegen in eigener Verantwortung — was der freya-Ausfall zeigt (die
+Cloud wurde deshalb auf `phoebe` deployt).
 
-## 6. Recovery / Nächste Schritte (sobald freya wieder online)
+## 7. Recovery-Pfad für freya (Referenz — Cloud läuft aktuell auf phoebe)
+
+> Die produktive Cloud-DB läuft bereits auf **phoebe** (§ oben). Dieser Abschnitt
+> bleibt als dokumentierter Wiederherstellungs-/Umzugspfad für **freya**, sobald
+> dieser Host wieder online ist (Power-Cycle durch Giovanni nötig).
 
 > **⚠ Verdacht auf Auslöser der Störung.** Unmittelbar vor dem Netzausfall wurde
 > die Proxmox-Datacenter-Firewall aktiviert (`/etc/pve/firewall/cluster.fw`
@@ -162,4 +186,4 @@ mysql -h 192.168.1.62 -u giovanni_dba -p --ssl-ca=cloud-ca-giovanni.pem \
 
 ---
 
-*Sign-off Setup-Bauplan: Giovanni Merola, 02.07.2026. Live-Deployment ausstehend (freya offline, wartet auf BMC-Power-Cycle).*
+*Sign-off: Giovanni Merola. Setup-Bauplan 02.07.2026; **eigene Cloud LIVE deployt 06.07.2026** auf `phoebe` (Endpoint 192.168.1.62:3306, TLS erzwungen). freya-Recovery-Pfad (§7) bleibt als Referenz dokumentiert.*

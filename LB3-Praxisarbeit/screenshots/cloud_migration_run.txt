@@ -1,0 +1,42 @@
+===============================================================
+ M141 LB3 - Automatisierte Migration -> EIGENE Cloud (Homelab)
+ Quelle: lokaler DB-Dump (backpacker_lb3_giovanni_dump.sql)
+ Ziel:   cloud-db-giovanni  192.168.1.62:3306  (TLS erzwungen)
+ Client: phoebe (Proxmox-Host) ueber TLS/CA  -  2026-07-06 23:56
+===============================================================
+
+==> 1) Cloud-DB anlegen (utf8mb4)
+    OK
+
+==> 2) Struktur + Daten per TLS einspielen (mysqldump-Restore)
+    Restore OK (5142 Zeilen SQL)
+
+==> 3) Zugriffsberechtigungen (DCL) automatisiert uebertragen
+GRANT SELECT, INSERT, UPDATE, DELETE ON `backpacker_lb3_giovanni`.`tbl_leistung` TO `role_management`
+GRANT SELECT ON `backpacker_lb3_giovanni`.`tbl_buchung` TO `role_management`
+GRANT SELECT, INSERT, UPDATE, DELETE ON `backpacker_lb3_giovanni`.`tbl_land` TO `role_management`
+GRANT SELECT, INSERT, UPDATE, DELETE ON `backpacker_lb3_giovanni`.`tbl_benutzer` TO `role_management`
+Grants for giovanni_benutzer@%
+GRANT `role_benutzer` TO `giovanni_benutzer`@`%`
+GRANT USAGE ON *.* TO `giovanni_benutzer`@`%` IDENTIFIED BY PASSWORD '*EF761B4BA1B709F6E09C356DED707D46FA13CAE4' REQUIRE SSL
+SET DEFAULT ROLE `role_benutzer` FOR `giovanni_benutzer`@`%`
+Grants for giovanni_manager@%
+GRANT `role_management` TO `giovanni_manager`@`%`
+GRANT USAGE ON *.* TO `giovanni_manager`@`%` IDENTIFIED BY PASSWORD '*50691591559B10C906664E6A26A5DE0207322572' REQUIRE SSL
+SET DEFAULT ROLE `role_management` FOR `giovanni_manager`@`%`
+
+==> 4) Smoke-Test: Zeilenzahlen + TLS-Chiffre
++----------------+------+
+| t              | c    |
++----------------+------+
+| tbl_personen   | 2036 |
+| tbl_benutzer   |   11 |
+| tbl_land       |   82 |
+| tbl_leistung   |    8 |
+| tbl_buchung    | 1006 |
+| tbl_positionen | 1746 |
++----------------+------+
+Variable_name	Value
+Ssl_cipher	TLS_AES_256_GCM_SHA384
+
+==> FERTIG - Migration abgeschlossen.

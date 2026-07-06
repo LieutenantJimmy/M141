@@ -1,0 +1,7 @@
+# M141 LB3 - TLS-Verbindung zur eigenen Cloud verifiziert - Giovanni Merola
+$ mysql -h 192.168.1.62 -u giovanni_dba -p... --ssl-verify-server-cert --ssl-ca=cloud-ca-giovanni.pem
+eingeloggt_als	server
+giovanni_dba@%	cloud-db-giovanni
+Variable_name	Value
+Ssl_cipher	TLS_AES_256_GCM_SHA384
+Ssl_version	TLSv1.3

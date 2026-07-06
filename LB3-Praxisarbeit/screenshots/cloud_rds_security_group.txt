@@ -1,0 +1,17 @@
+# M141 LB3 - Firewall / IP-Allowlist der Cloud-DB (kein 0.0.0.0/0) - Giovanni Merola
+# Pendant zu 'Allowed inbound IP addresses' eines Managed-Anbieters
+
+$ cat /etc/pve/firewall/9003.fw   (Proxmox-Firewall, Datacenter-FW aktiv)
+[OPTIONS]
+enable: 1
+policy_in: DROP
+policy_out: ACCEPT
+
+[RULES]
+IN ACCEPT -source 192.168.1.40/32 -p tcp -dport 3306 -log nolog # MySQL/TLS: Giovanni Workstation
+IN ACCEPT -source 192.168.1.30/32 -p tcp -dport 3306 -log nolog # MySQL/TLS: phoebe Host (Migration + Demo-Client)
+IN ACCEPT -source 192.168.1.2/32  -p tcp -dport 3306 -log nolog # MySQL/TLS: vpn-01 (Demo via VPN von TBZ)
+IN ACCEPT -source 10.10.0.0/24    -p tcp -dport 3306 -log nolog # MySQL/TLS: VPN-Client-Pool
+IN ACCEPT -source 192.168.1.0/24  -p icmp -log nolog # Ping-Diagnose LAN
+
+# Nur die gelisteten Quell-IPs erreichen Port 3306; alles andere DROP (policy_in).

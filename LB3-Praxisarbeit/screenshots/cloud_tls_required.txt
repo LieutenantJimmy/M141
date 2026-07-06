@@ -1,0 +1,8 @@
+# NEGATIV-TEST: Verbindung OHNE TLS wird abgewiesen (require_secure_transport=ON)
+$ mysql -h 192.168.1.62 -u giovanni_dba -p... --skip-ssl -e 'SELECT 1;'
+ERROR 3159 (08004): Connections using insecure transport are prohibited while --require_secure_transport=ON.
+
+# POSITIV zum Vergleich: dieselbe Anmeldung MIT TLS klappt:
+$ mysql -h 192.168.1.62 -u giovanni_dba -p... --ssl-ca=ca.pem -e 'SELECT CURRENT_USER();'
+eingeloggt_als
+giovanni_dba@%

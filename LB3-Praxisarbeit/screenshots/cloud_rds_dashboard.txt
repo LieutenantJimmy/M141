@@ -1,0 +1,19 @@
+# M141 LB3 - Cloud-DBMS Uebersicht (eigene Cloud auf Proxmox-Homelab) - Giovanni Merola
+# Pendant zum Managed-Cloud 'Service Overview'
+
+$ pct status 9003 && pct config 9003
+status: running
+cores: 2
+features: nesting=1,keyctl=1
+hostname: cloud-db-giovanni
+memory: 2048
+net0: name=eth0,bridge=vmbr0,firewall=1,gw=192.168.1.1,hwaddr=BC:24:11:31:1F:E0,ip=192.168.1.62/24,tag=1,type=veth
+onboot: 0
+ostype: debian
+rootfs: ssd-pool:subvol-9003-disk-0,size=8G
+tags: test
+unprivileged: 1
+
+# MariaDB-Dienst im Container:
+active
+MariaDB 11.8.6-MariaDB-0+deb13u1 from Debian-log  |  Endpoint 192.168.1.62:3306

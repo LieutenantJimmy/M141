@@ -1,0 +1,37 @@
+# M141 LB3 - Cloud Verbindungs-Info + Haertungs-Konfiguration - Giovanni Merola
+
+## Connection information
+  Host:     192.168.1.62
+  Port:     3306
+  Database: backpacker_lb3_giovanni
+  User:     giovanni_dba / giovanni_manager / giovanni_benutzer  (REQUIRE SSL)
+  SSL:      erzwungen (require_secure_transport=ON, TLSv1.3)
+  CA-Cert:  cloud-ca-giovanni.pem (eigene CA)
+
+## Advanced configuration (my.cnf, /etc/mysql/mariadb.conf.d/99-cloud-giovanni.cnf)
+bind-address              = 0.0.0.0
+require_secure_transport  = ON
+ssl-ca                    = /etc/mysql/certs/ca.pem
+ssl-cert                  = /etc/mysql/certs/server-cert.pem
+ssl-key                   = /etc/mysql/certs/server-key.pem
+
+# --- Zeichensatz (wie lokal, verhindert Migrations-Drift) ----
+character-set-server      = utf8mb4
+collation-server          = utf8mb4_unicode_ci
+
+# --- Haertung / Betrieb --------------------------------------
+skip-name-resolve         = 1
+max_connections           = 50
+wait_timeout              = 600
+interactive_timeout       = 600
+local-infile              = 0
+
+# --- Beobachtbarkeit -----------------------------------------
+slow_query_log            = 1
+slow_query_log_file       = /var/log/mysql/slow.log
+long_query_time           = 2
+log_error                 = /var/log/mysql/error.log
+
+# --- InnoDB ---------------------------------------------------
+innodb_buffer_pool_size        = 512M
+innodb_flush_log_at_trx_commit = 1
