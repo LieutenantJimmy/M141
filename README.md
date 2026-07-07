@@ -4,23 +4,18 @@
 **Kurs:** Q4 2025/26, Di Abend
 **Dozent:** Harald Müller (TBZ)
 
-Mein Lernportfolio für M141. Hier landen die Aufträge, Notizen, Screenshots und am Ende das LB3-Praxisprojekt. Wird mit ca. 15 % der Schlussnote bewertet (Teil von LB3).
+> ## 📌 LB3-Abgabe → [`LB3-Praxisarbeit/`](./LB3-Praxisarbeit)
+> **Einstieg für die Bewertung:** [`LB3-Praxisarbeit/README_Praxisarbeit.md`](./LB3-Praxisarbeit/README_Praxisarbeit.md)
+> (Index, Bewertungsmatrix-Mapping, alle Nachweise). Partnerarbeit: Giovanni Merola & Agustin.
+
+Mein Lernportfolio für M141. Hier landen die Aufträge, Notizen, Screenshots und das LB3-Praxisprojekt.
 
 ## Struktur
 
 | Ordner | Inhalt |
 |---|---|
+| [`LB3-Praxisarbeit/`](./LB3-Praxisarbeit) | **LB3 Praxisprojekt (Abgabe)** — Backpacker-DB: lokal → eigene Cloud, TLS, DCL, Migration, Tests |
 | [`1.Tag/`](./1.Tag) | Einführung, DB-Engines, MariaDB-Installation |
-| `2.Tag/` | Konfiguration & Datenimport |
-| `3.Tag/` | Tabellentypen & Transaktionen |
-| `4.Tag/` | Datenbanksicherheit |
-| `5.Tag/` | Zugriffssystem / DCL – **LB1** |
-| `6.Tag/` | Server-Administration – LB3-Start |
-| `7.Tag/` | Testing & Performance – **LB2** |
-| `8.Tag/` | Weiterarbeit LB3 |
-| `9.Tag/` | **LB3** Abgabe |
-| `LB3-Praxisarbeit/` | Praxisprojekt (Paararbeit) |
-| `resources/` | Screenshots, Bilder |
 
 ## Ablaufplan PE24c Di Na
 
