@@ -206,7 +206,7 @@ Arrange the 3 windows so all 3 user names are visible → screenshot the whole d
 
 ## PART 11 — Final checks before the demo (5 min)
 
-- [ ] Bewertungsmatrix Excel: B4 = `Giovanni Merola`, D4 = 0 (Partnerarbeit, kein Einzelarbeit-Bonus), D28 = 41.5, D30 = 5.77.
+- [ ] Bewertungsmatrix Excel: B4 = `Giovanni Merola`, D4 = 0 (Einzelarbeit-Bonus bewusst verzichtet), D28 = 41.5, D30 = 5.77.
 - [ ] All 10 screenshots in `screenshots\` (6 local + 4 cloud + migration + verbindung + tls + tests + demo = ~10 total).
 - [ ] GitLab repo shows all folders.
 - [ ] Aiven service is **Running** (keep it up until demo day).

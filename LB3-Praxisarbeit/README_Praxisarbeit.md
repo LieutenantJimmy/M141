@@ -2,7 +2,7 @@
 
 **Autor:** Giovanni Merola &nbsp;·&nbsp; **Klasse:** M141 &nbsp;·&nbsp; **Schule:** TBZ &nbsp;·&nbsp; **Abgabe:** 30.06.2026
 
-> **Zeitachse (zur Einordnung der Datei-Daten):** Abgabe-Stand der Arbeit ist der 30.06.2026; die Cloud-Deploy- und Verifikations-Artefakte datieren **06.–07.07.2026**, weil der erste Ziel-Host (freya) am 02.07. ausfiel und die eigene Cloud host-agnostisch auf einem zweiten Homelab-Host (phoebe) neu deployt wurde. **Arbeitsform: Partnerarbeit mit Agustin** (Demo gemeinsam, siehe §7).
+> **Zeitachse (zur Einordnung der Datei-Daten):** Abgabe-Stand der Arbeit ist der 30.06.2026; die Cloud-Deploy- und Verifikations-Artefakte datieren **06.–07.07.2026**, weil der erste Ziel-Host (freya) am 02.07. ausfiel und die eigene Cloud host-agnostisch auf einem zweiten Homelab-Host (phoebe) neu deployt wurde. **Arbeitsform: Einzelabgabe** (Demo solo, siehe §7).
 
 > **Ziel.** Die Backpacker-Hostel-Datenbank von Access auf MariaDB migrieren — zuerst lokal (XAMPP/MariaDB), dann in die **eigene, selbst gehostete Cloud** (MariaDB-LXC auf dem Proxmox-Homelab, TLS erzwungen). Inklusive Normalisierung auf 2.NF, Datenbereinigung, Rollenkonzept mit Spaltenrechten, Tests, automatisierte Migration mit TLS und vollständige Dokumentation. *(Aiven wurde evaluiert, aber bewusst zugunsten der eigenen Homelab-Cloud verworfen — volle Kontrolle, kein Vendor-Lock, Max-Bonus.)*
 
@@ -62,7 +62,7 @@ LB3-Praxisarbeit/
 ├── README_Praxisarbeit.md          ← Diese Datei (Projekt-Index)
 ├── .gitignore                      ← OS/Office-Junk und Secrets ausgeschlossen
 ├── cleanup_before_upload.ps1       ← Helper zum Aufräumen vor GitLab-Upload
-├── M141 LB3 Bewertung LE.xlsx      ← Selbsteinschätzungs-Matrix (Partnerarbeit, Note 5.77)
+├── M141 LB3 Bewertung LE.xlsx      ← Selbsteinschätzungs-Matrix (Note 5.77, Einzelarbeit-Bonus verzichtet)
 ├── LB3_Praesentation.pptx          ← Folien-Deck für die Demo (8 Folien, 16:9)
 ├── build_pptx.py                   ← Reproduzierbarer Generator des Decks (python-pptx)
 ├── backpacker_lb3_giovanni_dump.sql(.gz) ← DB-Dump (Backup, Struktur+Daten) — Abgabe-Deliverable
@@ -215,7 +215,7 @@ Details + Live-Beweise: `docs/MS_C_Cloud_SelfHosted.md`, `docs/MS_D_Migration.md
 
 Siehe `M141 LB3 Bewertung LE.xlsx` (B4 = Giovanni Merola, D28 = 41.5, **Note D30 = 5.77**).
 
-**Arbeitsform: Partnerarbeit** — die Präsentation/Demo erfolgt gemeinsam mit Agustin (gemäss LB3-Rahmen zulässig). Der Einzelarbeit-Bonus (+2P, Zelle D4) wird entsprechend **nicht** beansprucht (D4 = 0).
+**Arbeitsform: Einzelabgabe** — Präsentation/Demo solo durch Giovanni Merola. Auf den **Einzelarbeit-Bonus (+2P, Zelle D4) wird bewusst verzichtet** (D4 = 0): In einer frühen Projektphase diente Material eines Mitschülers als Vorlage; es wurde vollständig durch **eigene, live verifizierte Arbeit ersetzt** (eigene Cloud-Infrastruktur, alle Nachweise selbst erzeugt — siehe `VERIFICATION.md` und `docs/Reproduktion_Lokal.md`). Der Verzicht auf den Bonus bildet das transparent ab.
 
 Begründung der Selbsteinstufung pro Zeile inkl. konkreter Artefakt-Referenz: ebd. Kommentar-Spalte.
 

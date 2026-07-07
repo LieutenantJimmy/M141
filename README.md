@@ -6,7 +6,7 @@
 
 > ## 📌 LB3-Abgabe → [`LB3-Praxisarbeit/`](./LB3-Praxisarbeit)
 > **Einstieg für die Bewertung:** [`LB3-Praxisarbeit/README_Praxisarbeit.md`](./LB3-Praxisarbeit/README_Praxisarbeit.md)
-> (Index, Bewertungsmatrix-Mapping, alle Nachweise). Partnerarbeit: Giovanni Merola & Agustin.
+> (Index, Bewertungsmatrix-Mapping, alle Nachweise). Abgabe: Giovanni Merola (Einzelabgabe).
 
 Mein Lernportfolio für M141. Hier landen die Aufträge, Notizen, Screenshots und das LB3-Praxisprojekt.
 

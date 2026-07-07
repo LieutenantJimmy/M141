@@ -1,6 +1,6 @@
 # VERIFICATION — Rigor-Audit mit Live-Beweisen
 
-*M141 LB3 · Backpacker_LB3 · Giovanni Merola & Agustin · Audit-Lauf: 07.07.2026*
+*M141 LB3 · Backpacker_LB3 · Giovanni Merola · Audit-Lauf: 07.07.2026*
 
 Jede Behauptung unten wurde **live gegen die produktive Cloud-DB** ausgeführt
 (`cloud-db-giovanni`, CT 9003, `192.168.1.62:3306`, alle Verbindungen per TLS mit
